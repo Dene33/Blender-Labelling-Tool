@@ -1,1 +1,0 @@
-# Blender-Labelling-Tool
