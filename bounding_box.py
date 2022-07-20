@@ -33,7 +33,6 @@
 # Each corner's weight is assigned to the corresponding bone.
 # Material added (Name: as inputted name, Base color: as inputted, Surface > Alpha: 0.3, Settings > Blend Mode: Alpha Blend)
 
-
 import bpy
 from math import radians
 import os
@@ -74,7 +73,7 @@ def bounding_box_set_up(name, color):
     arm = bpy.context.active_object
 
     bones = {
-        # bone name : head, tail, parent, layer
+        # bone name : [head, tail, parent, layer]
         "root": [(0, 0, 0), (0, 1, 0), None, 0],
         "top_left": [(-1, 0, 1), (-1, 1, 1), "root", 0],
         "bottom_right": [(1, 0, -1), (1, 1, -1), "root", 0],
@@ -87,7 +86,6 @@ def bounding_box_set_up(name, color):
     bpy.ops.object.mode_set(mode="EDIT")
 
     # delete exising bone in created armature
-
     for i in arm.data.bones:
         i = arm.data.edit_bones[i.name]
         arm.data.edit_bones.remove(i)
@@ -135,22 +133,20 @@ def bounding_box_set_up(name, color):
         ],
     }
 
+    bone_head_loc = {}
     for bone, constr in constraints.items():
         p_bone = arm.pose.bones[bone]
+        bone_world_head = arm.matrix_world @ p_bone.head
+        bone_head_loc[bone] = bone_world_head
 
         for c in constr:
             p_bone.constraints.new(c[0])
             constr_name = get_constrain_name(p_bone.name, arm)
             constraint = p_bone.constraints[constr_name]
             if c[0] == "LIMIT_LOCATION":
-
                 constraint.use_min_y = True
                 constraint.min_y = 0
 
-                # # constraint.use_min_z = True
-                # # constraint.min_z = 0
-
-                # min
                 constraint.use_max_y = True
                 constraint.max_y = 0
 
@@ -185,11 +181,11 @@ def bounding_box_set_up(name, color):
     bpy.context.active_object.name = f"{name}_bb"
     plane = bpy.context.active_object
     plane.rotation_euler[0] += radians(90)
+    bpy.ops.object.transform_apply(rotation=True)
 
     # ===========================================================
 
     # creating material
-    mat_name = name
     material_basic = bpy.data.materials.new(name=name)
     material_basic.use_nodes = True
     plane.active_material = material_basic
@@ -201,6 +197,31 @@ def bounding_box_set_up(name, color):
     # add Alpha Blend to material
     material_basic.blend_method = "BLEND"
 
+    # ===========================================================
 
-# # ===========================================================
-# bounding_box_set_up("name lolk", 123)
+    print()
+
+    for k, v in bone_head_loc.items():
+        group = plane.vertex_groups.new(name=k)
+
+    for vert in plane.data.vertices:
+        vert_loc = plane.matrix_world @ vert.co
+        print(f"vert {vert_loc}")
+        for k, v in bone_head_loc.items():
+            if vert_loc[0] == v[0] and vert_loc[2] == v[2]:
+                group = plane.vertex_groups[k]
+                print(f"\t {vert.index} {type(vert.index)}) ")
+                group.add([vert.index], 1.0, "ADD")
+                print(f"\t {k}  {v} ")
+
+    # co_final = plane.matrix_world @ v.co
+
+    # # now we can view the location by applying it to an object
+    # obj_empty = bpy.data.objects.new("Test", None)
+    # bpy.context.collection.objects.link(obj_empty)
+    # obj_empty.location = co_final
+
+
+# # # ===========================================================
+# # # ===========================================================
+# # bounding_box_set_up("name lolk", 123)
