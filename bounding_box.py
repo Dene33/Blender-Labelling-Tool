@@ -33,8 +33,10 @@
 # Each corner's weight is assigned to the corresponding bone.
 # Material added (Name: as inputted name, Base color: as inputted, Surface > Alpha: 0.3, Settings > Blend Mode: Alpha Blend)
 
+from ast import Assign
 import bpy
 from math import radians
+from . import import_video
 import os
 
 os.system("cls")
@@ -81,6 +83,7 @@ def bounding_box_set_up(name, color):
         "bottom_left": [(-1, 0, -1), (-1, 1, -1), None, 1],
     }
 
+    import_video.create_collection(name)
     # ===========================================================
 
     bpy.ops.object.mode_set(mode="EDIT")
@@ -133,11 +136,8 @@ def bounding_box_set_up(name, color):
         ],
     }
 
-    bone_head_loc = {}
     for bone, constr in constraints.items():
         p_bone = arm.pose.bones[bone]
-        bone_world_head = arm.matrix_world @ p_bone.head
-        bone_head_loc[bone] = bone_world_head
 
         for c in constr:
             p_bone.constraints.new(c[0])
@@ -173,6 +173,8 @@ def bounding_box_set_up(name, color):
                 if c[1][1] == "z":
                     constraint.use_z = True
 
+            constraint.show_expanded = False
+
     # ===========================================================
 
     # add plane
@@ -199,27 +201,26 @@ def bounding_box_set_up(name, color):
 
     # ===========================================================
 
-    print()
-
-    for k, v in bone_head_loc.items():
+    # add vertex group
+    for k, v in bones.items():
         group = plane.vertex_groups.new(name=k)
 
+    # Assign vertices to vertex group
     for vert in plane.data.vertices:
         vert_loc = plane.matrix_world @ vert.co
-        print(f"vert {vert_loc}")
-        for k, v in bone_head_loc.items():
-            if vert_loc[0] == v[0] and vert_loc[2] == v[2]:
+
+        for k, v in bones.items():
+            if vert_loc[0] == v[0][0] and vert_loc[2] == v[0][2]:
                 group = plane.vertex_groups[k]
-                print(f"\t {vert.index} {type(vert.index)}) ")
                 group.add([vert.index], 1.0, "ADD")
-                print(f"\t {k}  {v} ")
 
-    # co_final = plane.matrix_world @ v.co
+    # ===========================================================
 
-    # # now we can view the location by applying it to an object
-    # obj_empty = bpy.data.objects.new("Test", None)
-    # bpy.context.collection.objects.link(obj_empty)
-    # obj_empty.location = co_final
+    # add armature modifier
+    arm_mod = plane.modifiers.new(type="ARMATURE", name="armature")
+    arm_mod.object = arm
+
+    # bpy.context.object.modifiers["Armature"].object = None
 
 
 # # # ===========================================================

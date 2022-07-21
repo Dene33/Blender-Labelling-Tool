@@ -36,6 +36,14 @@ def camera_set_up(filepath):
 
     # ===============================================================
 
+    # delete exising camera
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in bpy.data.objects:
+        o.select_set(False)
+        if o.type == "CAMERA":
+            o.select_set(True)
+            bpy.ops.object.delete()
+
     # create camera and displace it -10 m Y, 90 degrees on X
     bpy.ops.object.camera_add(
         location=(0, -10, 0),

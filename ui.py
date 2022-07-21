@@ -5,7 +5,7 @@ from bpy.types import Operator
 from bpy.props import StringProperty
 
 
-from . import labeling_bones, bounding_box
+from . import import_video, bounding_box
 
 # from . import bounding_box
 
@@ -45,7 +45,7 @@ class ImportVideoOperator(Operator, ImportHelper):
         # print("Some Boolean:", self.some_boolean)
 
         print("import vid")
-        labeling_bones.camera_set_up(self.filepath)
+        import_video.camera_set_up(self.filepath)
 
         return {"FINISHED"}
 
