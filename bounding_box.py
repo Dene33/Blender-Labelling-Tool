@@ -174,7 +174,7 @@ def bounding_box_set_up(name, color):
 
     # ===========================================================
 
-    # make constraints
+    # make constraints, set color to bone group
     bpy.ops.object.mode_set(mode="POSE")
 
     constraints = {
@@ -200,8 +200,19 @@ def bounding_box_set_up(name, color):
         ],
     }
 
+    # create new bone group
+    bone_group = arm.pose.bone_groups
+    bone_group_name = "Custom Bone Group"
+    bone_group.new(name=bone_group_name)
+    # set color to bone group
+    bone_group.active.color_set = "CUSTOM"
+    bone_group.active.colors.normal = (color[0], color[1], color[2])
+
     for bone, constr in constraints.items():
         p_bone = arm.pose.bones[bone]
+
+        # assign bone to bone group
+        p_bone.bone_group = bone_group.get(bone_group_name)
 
         for c in constr:
             p_bone.constraints.new(c[0])
@@ -222,11 +233,9 @@ def bounding_box_set_up(name, color):
 
             if c[0] == "COPY_LOCATION":
                 constraint.target = bpy.data.objects[arm.name]
-
                 constraint.subtarget = c[1][0]
 
                 constraint.use_x = False
-
                 constraint.use_y = False
                 constraint.use_z = False
 
@@ -268,7 +277,6 @@ def bounding_box_set_up(name, color):
     # add vertex group
     for k, v in bones.items():
         group = plane.vertex_groups.new(name=k)
-        print(k, v[4])
         if v[4] != None:
             arm.pose.bones[k].custom_shape = bpy.data.objects[v[4].name]
 
