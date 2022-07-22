@@ -33,7 +33,7 @@
 # Each corner's weight is assigned to the corresponding bone.
 # Material added (Name: as inputted name, Base color: as inputted, Surface > Alpha: 0.3, Settings > Blend Mode: Alpha Blend)
 
-from ast import Assign
+from gc import collect
 import bpy
 from math import radians
 from . import import_video
@@ -68,6 +68,41 @@ def get_constrain_name(bone, parent_obj):
 
 
 def bounding_box_set_up(name, color):
+    # create collection
+    import_video.create_collection(name)
+
+    # create plane as custom obj for bone
+    bpy.ops.mesh.primitive_plane_add(
+        size=2,
+        enter_editmode=False,
+        align="WORLD",
+        location=(0, 0, 0),
+        scale=(0.1, 0.1, 0.1),
+    )
+
+    bpy.context.active_object.name += "_custom_obj"
+    plane_custom_obj = bpy.context.active_object
+    plane_custom_obj.scale = (0.1, 0.1, 0.1)
+    plane_custom_obj.rotation_euler[0] += radians(90)
+    bpy.ops.object.transform_apply(rotation=True)
+    bpy.ops.object.transform_apply(scale=True)
+
+    # create cirle as custom obj for bone
+    bpy.ops.mesh.primitive_circle_add(
+        radius=1,
+        enter_editmode=False,
+        align="WORLD",
+        location=(0, 0, 0),
+        scale=(0.1, 0.1, 0.1),
+    )
+    circle_custom_obj = bpy.context.active_object
+    bpy.context.active_object.name += "_custom_obj"
+    circle_custom_obj.scale = (0.1, 0.1, 0.1)
+    circle_custom_obj.rotation_euler[0] += radians(90)
+    bpy.ops.object.transform_apply(rotation=True)
+    bpy.ops.object.transform_apply(scale=True)
+
+    # ===========================================================
     # create armature
     bpy.ops.object.armature_add(
         enter_editmode=False, align="WORLD", location=(0, 0, 0), scale=(1, 1, 1)
@@ -75,15 +110,44 @@ def bounding_box_set_up(name, color):
     arm = bpy.context.active_object
 
     bones = {
-        # bone name : [head, tail, parent, layer]
-        "root": [(0, 0, 0), (0, 1, 0), None, 0],
-        "top_left": [(-1, 0, 1), (-1, 1, 1), "root", 0],
-        "bottom_right": [(1, 0, -1), (1, 1, -1), "root", 0],
-        "top_right": [(1, 0, 1), (1, 1, 1), None, 1],
-        "bottom_left": [(-1, 0, -1), (-1, 1, -1), None, 1],
+        # bone name : [head, tail, parent, layer, custom_obj]
+        "root": [
+            (0, 0, 0),
+            (0, 1, 0),
+            None,
+            0,
+            plane_custom_obj,
+        ],
+        "top_left": [
+            (-1, 0, 1),
+            (-1, 1, 1),
+            "root",
+            0,
+            circle_custom_obj,
+        ],
+        "bottom_right": [
+            (1, 0, -1),
+            (1, 1, -1),
+            "root",
+            0,
+            circle_custom_obj,
+        ],
+        "top_right": [
+            (1, 0, 1),
+            (1, 1, 1),
+            None,
+            1,
+            None,
+        ],
+        "bottom_left": [
+            (-1, 0, -1),
+            (-1, 1, -1),
+            None,
+            1,
+            None,
+        ],
     }
 
-    import_video.create_collection(name)
     # ===========================================================
 
     bpy.ops.object.mode_set(mode="EDIT")
@@ -204,6 +268,9 @@ def bounding_box_set_up(name, color):
     # add vertex group
     for k, v in bones.items():
         group = plane.vertex_groups.new(name=k)
+        print(k, v[4])
+        if v[4] != None:
+            arm.pose.bones[k].custom_shape = bpy.data.objects[v[4].name]
 
     # Assign vertices to vertex group
     for vert in plane.data.vertices:
@@ -220,9 +287,17 @@ def bounding_box_set_up(name, color):
     arm_mod = plane.modifiers.new(type="ARMATURE", name="armature")
     arm_mod.object = arm
 
-    # bpy.context.object.modifiers["Armature"].object = None
+    # ===========================================================
+    # link objects to collection
+    import_video.link_to_collection(name, arm)
+    import_video.link_to_collection(name, plane_custom_obj)
+    import_video.link_to_collection(name, circle_custom_obj)
+    import_video.link_to_collection(name, plane)
+
+    plane_custom_obj.hide_set(True)
+    circle_custom_obj.hide_set(True)
 
 
-# # # ===========================================================
-# # # ===========================================================
-# # bounding_box_set_up("name lolk", 123)
+# # # # ===========================================================
+# # # # ===========================================================
+# # # bounding_box_set_up("name lolk", 123)

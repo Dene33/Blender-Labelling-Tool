@@ -16,6 +16,16 @@ def create_collection(coll_name):
 
 # ===============================================================
 
+
+def link_to_collection(cam_coll_name, obj):
+    for coll in obj.users_collection:
+        coll.objects.unlink(obj)
+    coll_target = bpy.context.scene.collection.children.get(cam_coll_name)
+    coll_target.objects.link(obj)
+
+
+# ===============================================================
+
 # main script
 def camera_set_up(filepath):
 
@@ -59,10 +69,7 @@ def camera_set_up(filepath):
     # ===============================================================
 
     # unlink camera from collection and link to Camera collection created
-    for coll in my_cam.users_collection:
-        coll.objects.unlink(my_cam)
-    coll_target = bpy.context.scene.collection.children.get(cam_coll_name)
-    coll_target.objects.link(my_cam)
+    link_to_collection(cam_coll_name, my_cam)
 
     # ===============================================================
 
