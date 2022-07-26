@@ -32,35 +32,47 @@ def get_constrain_name(bone, parent_obj):
 
 
 def bounding_box_set_up(name, color):
+    try:
+        bpy.ops.object.mode_set(mode="OBJECT")
+    except:
+        pass
     # create collections
     arm_coll = import_video.create_collection(name)
     bone_shape_coll = import_video.create_collection("Bone Shapes", True)
 
     # ===========================================================
-    # # create plane as custom obj for bone
-    # bpy.ops.mesh.primitive_plane_add(size=2,enter_editmode=False,align="WORLD",location=(0, 0, 0),scale=(0.1, 0.1, 0.1),)
+    # create plane as custom obj for bone
+    if "Plane_Custom_Obj" not in bpy.data.objects:
+        bpy.ops.mesh.primitive_plane_add(
+            size=2, enter_editmode=False, align="WORLD", location=(0, 0, 0)
+        )
 
-    # bpy.context.active_object.name += "_custom_obj"
-    # plane_custom_obj = bpy.context.active_object
-    # plane_custom_obj.scale = (0.1, 0.1, 0.1)
-    # plane_custom_obj.rotation_euler[0] += radians(90)
-    # bpy.ops.object.transform_apply(rotation=True)
-    # bpy.ops.object.transform_apply(scale=True)
+        bpy.context.active_object.name = "Plane_Custom_Obj"
+        plane_custom_obj = bpy.context.active_object
+        plane_custom_obj.scale = (0.1, 0.1, 0.1)
+        plane_custom_obj.rotation_euler[0] += radians(90)
+        bpy.ops.object.transform_apply(rotation=True)
+        bpy.ops.object.transform_apply(scale=True)
+    else:
+        plane_custom_obj = bpy.data.objects["Plane_Custom_Obj"]
 
     # create cirle as custom obj for bone
-    bpy.ops.mesh.primitive_circle_add(
-        radius=1, enter_editmode=False, align="WORLD", location=(0, 0, 0)
-    )
-    circle_custom_obj = bpy.context.active_object
-    bpy.context.active_object.name += "_custom_obj"
-    circle_custom_obj.scale = (0.1, 0.1, 0.1)
-    circle_custom_obj.rotation_euler[0] += radians(90)
-    bpy.ops.object.transform_apply(rotation=True)
-    bpy.ops.object.transform_apply(scale=True)
+    if "Circle_Custom_Obj" not in bpy.data.objects:
+        bpy.ops.mesh.primitive_circle_add(
+            radius=1, enter_editmode=False, align="WORLD", location=(0, 0, 0)
+        )
+        circle_custom_obj = bpy.context.active_object
+        bpy.context.active_object.name = "Circle_Custom_Obj"
+        circle_custom_obj.scale = (0.1, 0.1, 0.1)
+        circle_custom_obj.rotation_euler[0] += radians(90)
+        bpy.ops.object.transform_apply(rotation=True)
+        bpy.ops.object.transform_apply(scale=True)
 
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.fill_grid(span=1, offset=11, use_interp_simple=False)
-    bpy.ops.object.mode_set(mode="OBJECT")
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.mesh.fill_grid(span=1, offset=11, use_interp_simple=False)
+        bpy.ops.object.mode_set(mode="OBJECT")
+    else:
+        circle_custom_obj = bpy.data.objects["Circle_Custom_Obj"]
 
     # ===========================================================
     # create armature
@@ -77,8 +89,7 @@ def bounding_box_set_up(name, color):
             (0, 1, 0),
             None,
             0,
-            circle_custom_obj,
-            # plane_custom_obj,
+            plane_custom_obj,
         ],
         "top_left": [
             (-1, 0, 1),
@@ -220,6 +231,8 @@ def bounding_box_set_up(name, color):
     plane.rotation_euler[0] += radians(90)
     bpy.ops.object.transform_apply(rotation=True)
 
+    plane.parent = arm
+
     # ===========================================================
 
     # creating material
@@ -260,11 +273,11 @@ def bounding_box_set_up(name, color):
     # ===========================================================
     # link objects to collection
     import_video.link_to_collection(arm_coll, arm)
-    # import_video.link_to_collection(bone_shape_coll, plane_custom_obj)
+    import_video.link_to_collection(bone_shape_coll, plane_custom_obj)
     import_video.link_to_collection(bone_shape_coll, circle_custom_obj)
     import_video.link_to_collection(arm_coll, plane)
 
-    # plane_custom_obj.hide_set(True)
+    plane_custom_obj.hide_set(True)
     circle_custom_obj.hide_set(True)
 
     bpy.ops.object.select_all(action="DESELECT")

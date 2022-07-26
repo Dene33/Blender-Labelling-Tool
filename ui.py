@@ -28,7 +28,7 @@ PROPS = [
 class ImportVideoOperator(Operator, ImportHelper):
     bl_idname = "opr.import_video"
     bl_label = "Object Renamer"
-    bl_options = {"UNDO"}
+    bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
         """Do something with the selected file(s)."""
@@ -47,9 +47,9 @@ class ImportVideoOperator(Operator, ImportHelper):
 
 
 class AddBoundingBoxOperator(Operator):
-
     bl_idname = "opr.bounding_box_operator"
     bl_label = "bound box"
+    bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
         bounding_box.bounding_box_set_up(

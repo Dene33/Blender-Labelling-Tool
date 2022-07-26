@@ -25,7 +25,7 @@ def create_collection(coll_name, create_new=False):
             print(f"[-] collection named {coll_name} already exists")
             for i in range(1, 40):
                 i = f"{i:003}"
-                new_coll_name = f"{coll_name}_{i}"
+                new_coll_name = f"{coll_name}.{i}"
                 if (new_coll_name in bpy.data.collections) == False:
                     coll_name = new_coll_name
                     make_collection(coll_name)
@@ -50,6 +50,10 @@ def link_to_collection(cam_coll_name, obj):
 
 # main script
 def camera_set_up(filepath):
+    try:
+        bpy.ops.object.mode_set(mode="OBJECT")
+    except:
+        pass
 
     # create collection
     cam_coll_name = "Camera"
