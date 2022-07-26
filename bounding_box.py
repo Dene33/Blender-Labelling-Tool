@@ -1,39 +1,3 @@
-# - After clicking the button, prompts to enter Bounding Box's name and color
-# - Creates collection with input BB's name
-# - Creates armature with BB's name
-# - Armature consists of 5 bones:
-# 1. root 		Head: 0, 0, 0 	Tail: 0, 1, 0,
-# 	Layer: 0, Custom object: Plane(scales: 0.1),
-# 	Constraints:
-# 		Limit Location (max, min Y: 0),
-# 		Limit Rotation: (all 0),
-# 2. top_left 	Head: -1, 0, 1 	Tail: -1, 1, 1.
-# 	Parent: root, Layer: 0, Custom object: Circle(scales: 0.1),
-# 	Constraints:
-# 		Limit Location (max, min Y: 0),
-# 		Limit Rotation: (all 0),
-# 3. bottom_right Head: 1, 0, -1 	Tail: 1, 1, -1.
-# 	Parent: root, Layer: 0, Custom object: Circle (scales: 0.1),
-# 	Constraints:
-# 		Limit Location (max, min Y: 0),
-# 		Limit Rotation: (all 0),
-# 4. top_right 	Head: 1, 0, 1 	Tail: 1, 1, 1
-# 	Parent: None, Layer: 1,
-# 	Constraints:
-# 		Copy Location (target bone: top_left, axis: Z), :
-# 		Copy Location (target bone: bottom_right, axis: X)
-# 5. bottom_left 	Head: -1, 0, -1 Tail: -1, 1, -1
-# 	Parent: None, Layer: 1,
-# 	Constraints:
-# 		Copy Location (target bone: top_left, axis: X), :
-# 		Copy Location (target bone: bottom_right, axis: Z)
-# - Custom color set assigned to the armature, color set to the inputted color
-# - 2nd bone layer should be hidden
-# - Plane added. Name: "INPUT_NAME_bb" Transforms: all 0, but rotated 90 degrees on X.
-# Each corner's weight is assigned to the corresponding bone.
-# Material added (Name: as inputted name, Base color: as inputted, Surface > Alpha: 0.3, Settings > Blend Mode: Alpha Blend)
-
-from gc import collect
 import bpy
 from math import radians
 from . import import_video
@@ -68,32 +32,24 @@ def get_constrain_name(bone, parent_obj):
 
 
 def bounding_box_set_up(name, color):
-    # create collection
-    import_video.create_collection(name)
+    # create collections
+    arm_coll = import_video.create_collection(name)
+    bone_shape_coll = import_video.create_collection("Bone Shapes", True)
 
-    # create plane as custom obj for bone
-    bpy.ops.mesh.primitive_plane_add(
-        size=2,
-        enter_editmode=False,
-        align="WORLD",
-        location=(0, 0, 0),
-        scale=(0.1, 0.1, 0.1),
-    )
+    # ===========================================================
+    # # create plane as custom obj for bone
+    # bpy.ops.mesh.primitive_plane_add(size=2,enter_editmode=False,align="WORLD",location=(0, 0, 0),scale=(0.1, 0.1, 0.1),)
 
-    bpy.context.active_object.name += "_custom_obj"
-    plane_custom_obj = bpy.context.active_object
-    plane_custom_obj.scale = (0.1, 0.1, 0.1)
-    plane_custom_obj.rotation_euler[0] += radians(90)
-    bpy.ops.object.transform_apply(rotation=True)
-    bpy.ops.object.transform_apply(scale=True)
+    # bpy.context.active_object.name += "_custom_obj"
+    # plane_custom_obj = bpy.context.active_object
+    # plane_custom_obj.scale = (0.1, 0.1, 0.1)
+    # plane_custom_obj.rotation_euler[0] += radians(90)
+    # bpy.ops.object.transform_apply(rotation=True)
+    # bpy.ops.object.transform_apply(scale=True)
 
     # create cirle as custom obj for bone
     bpy.ops.mesh.primitive_circle_add(
-        radius=1,
-        enter_editmode=False,
-        align="WORLD",
-        location=(0, 0, 0),
-        scale=(0.1, 0.1, 0.1),
+        radius=1, enter_editmode=False, align="WORLD", location=(0, 0, 0)
     )
     circle_custom_obj = bpy.context.active_object
     bpy.context.active_object.name += "_custom_obj"
@@ -102,12 +58,17 @@ def bounding_box_set_up(name, color):
     bpy.ops.object.transform_apply(rotation=True)
     bpy.ops.object.transform_apply(scale=True)
 
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.fill_grid(span=1, offset=11, use_interp_simple=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+
     # ===========================================================
     # create armature
     bpy.ops.object.armature_add(
         enter_editmode=False, align="WORLD", location=(0, 0, 0), scale=(1, 1, 1)
     )
     arm = bpy.context.active_object
+    arm.name = name
 
     bones = {
         # bone name : [head, tail, parent, layer, custom_obj]
@@ -116,7 +77,8 @@ def bounding_box_set_up(name, color):
             (0, 1, 0),
             None,
             0,
-            plane_custom_obj,
+            circle_custom_obj,
+            # plane_custom_obj,
         ],
         "top_left": [
             (-1, 0, 1),
@@ -297,13 +259,18 @@ def bounding_box_set_up(name, color):
 
     # ===========================================================
     # link objects to collection
-    import_video.link_to_collection(name, arm)
-    import_video.link_to_collection(name, plane_custom_obj)
-    import_video.link_to_collection(name, circle_custom_obj)
-    import_video.link_to_collection(name, plane)
+    import_video.link_to_collection(arm_coll, arm)
+    # import_video.link_to_collection(bone_shape_coll, plane_custom_obj)
+    import_video.link_to_collection(bone_shape_coll, circle_custom_obj)
+    import_video.link_to_collection(arm_coll, plane)
 
-    plane_custom_obj.hide_set(True)
+    # plane_custom_obj.hide_set(True)
     circle_custom_obj.hide_set(True)
+
+    bpy.ops.object.select_all(action="DESELECT")
+    arm.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    # bpy.ops.object.mode_set(mode="POSE")
 
 
 # # # # ===========================================================

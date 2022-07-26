@@ -4,10 +4,7 @@ from bpy_extras.io_utils import ImportHelper
 from bpy.types import Operator
 from bpy.props import StringProperty
 
-
 from . import import_video, bounding_box
-
-# from . import bounding_box
 
 PROPS = [
     (
@@ -23,8 +20,6 @@ PROPS = [
             size=4,
         ),
     ),
-    # ("add_version", bpy.props.BoolProperty(name="Add Version", default=False)),
-    # ("version", bpy.props.IntProperty(name="Version", default=1)),
 ]
 
 # ===========================================================
@@ -33,18 +28,16 @@ PROPS = [
 class ImportVideoOperator(Operator, ImportHelper):
     bl_idname = "opr.import_video"
     bl_label = "Object Renamer"
+    bl_options = {"UNDO"}
 
     def execute(self, context):
         """Do something with the selected file(s)."""
 
         filename, extension = os.path.splitext(self.filepath)
 
-        print("Selected file:", self.filepath)
         print("File name:", filename)
         print("File extension:", extension)
-        # print("Some Boolean:", self.some_boolean)
 
-        print("import vid")
         import_video.camera_set_up(self.filepath)
 
         return {"FINISHED"}
@@ -59,13 +52,6 @@ class AddBoundingBoxOperator(Operator):
     bl_label = "bound box"
 
     def execute(self, context):
-        print("box")
-        params = (
-            context.scene.bounding_box,
-            context.scene.my_color,
-        )
-        print(f"bounding_box    {context.scene.bounding_box}")
-        print(f"my_color        {context.scene.my_color}")
         bounding_box.bounding_box_set_up(
             context.scene.bounding_box, context.scene.my_color
         )
