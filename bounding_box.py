@@ -36,6 +36,8 @@ def bounding_box_set_up(name, color):
         bpy.ops.object.mode_set(mode="OBJECT")
     except:
         pass
+    # print(f"mode {bpy.context.mode}")
+
     # create collections
     arm_coll = import_video.create_collection(name)
     bone_shape_coll = import_video.create_collection("Bone Shapes", True)
