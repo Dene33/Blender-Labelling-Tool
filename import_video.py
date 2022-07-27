@@ -50,10 +50,10 @@ def link_to_collection(cam_coll_name, obj):
 
 # main script
 def camera_set_up(filepath):
-    # try:
-    #     bpy.ops.object.mode_set(mode="OBJECT")
-    # except:
-    #     pass
+    try:
+        bpy.ops.object.mode_set(mode="OBJECT")
+    except:
+        pass
 
     # create collection
     cam_coll_name = "Camera"
