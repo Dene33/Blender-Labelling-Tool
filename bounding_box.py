@@ -31,12 +31,32 @@ def get_constrain_name(bone, parent_obj):
 # ===========================================================
 
 
+def get_new_name(name_to_check):
+    obj_names = [obj.name for obj in bpy.data.objects]
+    new_name = ""
+    # if there's no obj with the name, keep name as is
+    if name_to_check not in obj_names:
+        new_name = name_to_check
+    else:
+        for i in range(1, 40):
+            i = f"{i:003}"
+            new_name_check = f"{name_to_check}.{i}"
+            if (new_name_check in obj_names) == False:
+                new_name = new_name_check
+                break
+    return new_name
+
+
+# ===========================================================
+
+
 def bounding_box_set_up(name, color):
     try:
         bpy.ops.object.mode_set(mode="OBJECT")
     except:
         pass
     # print(f"mode {bpy.context.mode}")
+    name = get_new_name(name)
 
     # create collections
     arm_coll = import_video.create_collection(name)
@@ -82,7 +102,11 @@ def bounding_box_set_up(name, color):
         enter_editmode=False, align="WORLD", location=(0, 0, 0), scale=(1, 1, 1)
     )
     arm = bpy.context.active_object
-    arm.name = name
+    arm_name = name
+    # arm_name = get_new_name(name)
+
+    arm.name = arm_name
+    arm.data.name = arm_name
 
     bones = {
         # bone name : [head, tail, parent, layer, custom_obj]
@@ -228,9 +252,12 @@ def bounding_box_set_up(name, color):
     # add plane
     bpy.ops.mesh.primitive_plane_add(size=2, enter_editmode=False)
 
-    bpy.context.active_object.name = f"{name}_bb"
+    plane_name = f"{name}_plane"
+
+    bpy.context.active_object.name = plane_name
     plane = bpy.context.active_object
     plane.rotation_euler[0] += radians(90)
+    plane.location = (0, 0, 0)
     bpy.ops.object.transform_apply(rotation=True)
 
     plane.parent = arm
@@ -238,7 +265,8 @@ def bounding_box_set_up(name, color):
     # ===========================================================
 
     # creating material
-    material_basic = bpy.data.materials.new(name=name)
+    mat_name = f"{name}_mat"
+    material_basic = bpy.data.materials.new(name=mat_name)
     material_basic.use_nodes = True
     plane.active_material = material_basic
     principled_node = material_basic.node_tree.nodes.get("Principled BSDF")
