@@ -51,11 +51,10 @@ def get_new_name(name_to_check):
 
 
 def bounding_box_set_up(name, color):
-    try:
+
+    if bpy.context.mode != "OBJECT":
         bpy.ops.object.mode_set(mode="OBJECT")
-    except:
-        pass
-    # print(f"mode {bpy.context.mode}")
+
     name = get_new_name(name)
 
     # create collections
