@@ -1,5 +1,6 @@
 import bpy
-import bpy_extras.io_utils 
+import bpy_extras.io_utils
+import json
 import os
 
 os.system("cls")
@@ -38,6 +39,7 @@ render_size = (
     int(scene.render.resolution_y * render_scale),
 )
 
+yolo_co = {}
 for frame in range(frame_start, frame_end + 1):
     bpy.context.scene.frame_set(frame)
         
@@ -60,36 +62,53 @@ for frame in range(frame_start, frame_end + 1):
         bones_coords[bone.name] = (co_2d_x, co_2d_y)
 
         bones_info[bone.name] += [[frame, co_2d_x, co_2d_y]]
+        # bones_info[bone.name] += [[frame, co_2d_x, co_2d_y]]
         # bones_info[bone.name] += [[frame, bone.head, bone.tail]]
     
-    print('pascal_voc')
-    print(f"x_min:{bones_coords['top_left'][0]}", f"y_min:{bones_coords['top_left'][1]}",
-          f"x_max:{bones_coords['bottom_right'][0]}", f"y_max:{bones_coords['bottom_right'][1]}")
+    # print()
+    # print('pascal_voc')
+    # print(f"x_min:{bones_coords['top_left'][0]}", f"y_min:{bones_coords['top_left'][1]}",
+    #       f"x_max:{bones_coords['bottom_right'][0]}", f"y_max:{bones_coords['bottom_right'][1]}")
           
-    print('coco')
-    width = bones_coords['top_right'][0] - bones_coords['top_left'][0]
-    height = bones_coords['bottom_left'][1] - bones_coords['top_left'][1]
-    print(f"x_min:{bones_coords['top_left'][0]}", f"y_min:{bones_coords['top_left'][1]}",
-          f"width:{width}", f"height:{height}")
+    # print('coco')
+    # width = bones_coords['top_right'][0] - bones_coords['top_left'][0]
+    # height = bones_coords['bottom_left'][1] - bones_coords['top_left'][1]
+    # print(f"x_min:{bones_coords['top_left'][0]}", f"y_min:{bones_coords['top_left'][1]}",
+    #       f"width:{width}", f"height:{height}")
           
-    print('yolo')
+    # print('yolo')
     yolo_coords = pascal_voc_to_yolo(bones_coords['top_left'][0], bones_coords['top_left'][1],
                                      bones_coords['bottom_right'][0], bones_coords['bottom_right'][1],
                                      scene.render.resolution_x, scene.render.resolution_y)
     print(f"x_center: {yolo_coords[0]}", f"y_center: {yolo_coords[1]}", f"width: {yolo_coords[2]}", f"height: {yolo_coords[3]}")
+    yolo_co[frame] = [yolo_coords[0], yolo_coords[1], yolo_coords[2], yolo_coords[3]]
 
 
 # ===========================================================
 
-# for k, v in bones_info.items():
-#     print(k)
-#     # print(v)
-#     print(len(v))
+print("\n\n\n")
+for k, v in yolo_co.items():
+    print()
+    print(k)
+    print(v)
+    # print(type(v))
+    # print(len(v))
 
-print()
-print("=====================")
-print(bones_info["root"][0])
-print(bones_info["root"][0][0])
-print(bones_info["root"][0][1])
-# print(bones_info["root"][20])
-print("=====================")
+# print()
+# print("=====================")
+# print(bones_info["root"][0])
+# print(bones_info["root"][0][0])
+# print(bones_info["root"][0][1])
+# # print(bones_info["root"][20])
+# print("=====================")
+
+# ===========================================================
+
+# YOLO format is : object-class x y width height
+
+# Serializing json
+json_object = json.dumps(yolo_co, indent=4)
+ 
+# Writing to sample.json
+with open("sample.json", "w") as outfile:
+    outfile.write(json_object)
