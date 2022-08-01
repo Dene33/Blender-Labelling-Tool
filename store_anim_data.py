@@ -60,55 +60,54 @@ for frame in range(frame_start, frame_end + 1):
         co_2d_y = (render_size[1]-round(co_2d.y * render_size[1]))
         
         bones_coords[bone.name] = (co_2d_x, co_2d_y)
-
-        bones_info[bone.name] += [[frame, co_2d_x, co_2d_y]]
         # bones_info[bone.name] += [[frame, co_2d_x, co_2d_y]]
-        # bones_info[bone.name] += [[frame, bone.head, bone.tail]]
     
-    # print()
-    # print('pascal_voc')
+    # pascal_voc
     # print(f"x_min:{bones_coords['top_left'][0]}", f"y_min:{bones_coords['top_left'][1]}",
     #       f"x_max:{bones_coords['bottom_right'][0]}", f"y_max:{bones_coords['bottom_right'][1]}")
           
-    # print('coco')
+    # coco
     # width = bones_coords['top_right'][0] - bones_coords['top_left'][0]
     # height = bones_coords['bottom_left'][1] - bones_coords['top_left'][1]
     # print(f"x_min:{bones_coords['top_left'][0]}", f"y_min:{bones_coords['top_left'][1]}",
     #       f"width:{width}", f"height:{height}")
           
-    # print('yolo')
+    # yolo
     yolo_coords = pascal_voc_to_yolo(bones_coords['top_left'][0], bones_coords['top_left'][1],
                                      bones_coords['bottom_right'][0], bones_coords['bottom_right'][1],
                                      scene.render.resolution_x, scene.render.resolution_y)
-    print(f"x_center: {yolo_coords[0]}", f"y_center: {yolo_coords[1]}", f"width: {yolo_coords[2]}", f"height: {yolo_coords[3]}")
+    # print(f"x_center: {yolo_coords[0]}", f"y_center: {yolo_coords[1]}", f"width: {yolo_coords[2]}", f"height: {yolo_coords[3]}")
     yolo_co[frame] = [yolo_coords[0], yolo_coords[1], yolo_coords[2], yolo_coords[3]]
+    
+    # ===========================================================
+
+    filename = f"C:\\Users\\Dime\\Desktop\\txt\\{frame:006}.txt"
+    f = open(filename, "w")
+
+    class_id = "class_id"
+    content = f"{class_id} {yolo_coords[0]} {yolo_coords[1]} {yolo_coords[2]} {yolo_coords[3]}"
+
+    f.write(content)
+    f.close()
+
+# # ===========================================================
+
+# print("\n\n\n")
+# for k, v in yolo_co.items():
+#     print()
+#     print(k)
+#     print(v)
+#     # print(type(v))
+#     # print(len(v))
 
 
-# ===========================================================
+# # ===========================================================
 
-print("\n\n\n")
-for k, v in yolo_co.items():
-    print()
-    print(k)
-    print(v)
-    # print(type(v))
-    # print(len(v))
+# # YOLO format is : object-class x y width height
 
-# print()
-# print("=====================")
-# print(bones_info["root"][0])
-# print(bones_info["root"][0][0])
-# print(bones_info["root"][0][1])
-# # print(bones_info["root"][20])
-# print("=====================")
-
-# ===========================================================
-
-# YOLO format is : object-class x y width height
-
-# Serializing json
-json_object = json.dumps(yolo_co, indent=4)
+# # Serializing json
+# json_object = json.dumps(yolo_co, indent=4)
  
-# Writing to sample.json
-with open("sample.json", "w") as outfile:
-    outfile.write(json_object)
+# # Writing to sample.json
+# with open("C:\\Users\\Dime\\Desktop\\txt\\sample.json", "w") as outfile:
+#     outfile.write(json_object)
