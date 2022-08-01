@@ -50,7 +50,7 @@ def get_new_name(name_to_check):
 # ===========================================================
 
 
-def bounding_box_set_up(name, color):
+def bounding_box_set_up(name, class_id, color):
 
     if bpy.context.mode != "OBJECT":
         bpy.ops.object.mode_set(mode="OBJECT")
@@ -260,6 +260,11 @@ def bounding_box_set_up(name, color):
     bpy.ops.object.transform_apply(rotation=True)
 
     plane.parent = arm
+
+    # ===========================================================
+
+    # adding shape keys for plane
+    plane.shape_key_add(name=class_id)
 
     # ===========================================================
 

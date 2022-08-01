@@ -12,6 +12,10 @@ PROPS = [
         bpy.props.StringProperty(name="bounding_box", default="bb"),
     ),
     (
+        "class_id",
+        bpy.props.StringProperty(name="class_id", default="class id"),
+    ),
+    (
         "my_color",
         bpy.props.FloatVectorProperty(
             name="Bounding Box color",
@@ -53,7 +57,9 @@ class AddBoundingBoxOperator(Operator):
 
     def execute(self, context):
         bounding_box.bounding_box_set_up(
-            context.scene.bounding_box, context.scene.my_color
+            context.scene.bounding_box,
+            context.scene.class_id,
+            context.scene.my_color,
         )
         return {"FINISHED"}
 
