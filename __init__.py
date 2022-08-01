@@ -31,12 +31,14 @@ from .ui import (
     ImportVideoOperator,
     ImportVideoPanel,
     AddBoundingBoxOperator,
+    ExportData,
 )
 
 classes = [
     ImportVideoOperator,
     ImportVideoPanel,
     AddBoundingBoxOperator,
+    ExportData,
 ]
 
 
