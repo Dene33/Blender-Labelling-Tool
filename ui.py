@@ -35,7 +35,7 @@ PROPS = [
 
 class ImportVideoOperator(Operator, ImportHelper):
     bl_idname = "opr.import_video"
-    bl_label = "Object Renamer"
+    bl_label = "Import Video"
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
@@ -71,26 +71,39 @@ class AddBoundingBoxOperator(Operator):
 # ===========================================================
 
 
-class ExportData(Operator):
+class ExportData(Operator, ImportHelper):
     bl_idname = "opr.export_operator"
     bl_label = "export data"
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        print(bpy.context.scene.frame_start)
-        target_obj = context.scene.target
-        if target_obj == None:
-            self.report({"ERROR"}, f" No object selected")
-        else:
-            if target_obj.type != "ARMATURE":
-                self.report(
-                    {"ERROR"}, f" Object '{target_obj.name}' isn't a mesh armature"
-                )
+
+        file_path = self.filepath
+        # check if inputted path is folder
+        if os.path.isdir(file_path) == True:
+            print("File name:", file_path)
+
+            # get amrature obj selected by user
+            target_obj = context.scene.target
+            if target_obj == None:
+                self.report({"ERROR"}, f"No object selected")
             else:
-                frame_start = bpy.context.scene.frame_start
-                frame_end = bpy.context.scene.frame_end
-                print(target_obj.name, frame_start, frame_end)
-                export_data.export(target_obj.name, frame_start, frame_end)
+                if target_obj.type != "ARMATURE":
+                    self.report(
+                        {"ERROR"}, f"Object '{target_obj.name}' isn't a armature"
+                    )
+                else:
+                    frame_start = bpy.context.scene.frame_start
+                    frame_end = bpy.context.scene.frame_end
+                    print(target_obj.name, frame_start, frame_end)
+                    export_data.export(
+                        target_obj.name,
+                        frame_start,
+                        frame_end,
+                        file_path,
+                    )
+        else:
+            self.report({"ERROR"}, f"Path selected isn't a folder")
         return {"FINISHED"}
 
 
@@ -98,9 +111,8 @@ class ExportData(Operator):
 bpy.types.Scene.target = bpy.props.PointerProperty(type=bpy.types.Object)
 
 
-class ImportVideoPanel(bpy.types.Panel):
-
-    bl_idname = "VIEW3D_PT_import_video"
+class UiPanel(bpy.types.Panel):
+    bl_idname = "VIEW3D_PT_ui"
     bl_label = "Blender Labelling Tool"
     bl_category = "Blender Labelling Tool"
     bl_space_type = "VIEW_3D"
@@ -110,7 +122,7 @@ class ImportVideoPanel(bpy.types.Panel):
 
         col = self.layout.column()
         col.operator("opr.import_video", text="Import Video")
-        # col.operator("test.open_filebrowser", text="Import Video")
+
         for (prop_name, _) in PROPS:
             row = col.row()
             row.prop(context.scene, prop_name)

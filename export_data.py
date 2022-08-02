@@ -3,10 +3,9 @@ import bpy_extras.io_utils
 import json
 import os
 
-txt_path = "C:\\Users\\Dime\\Desktop\\txt\\"
-
-
 os.system("cls")
+
+# ===========================================================
 
 
 def pascal_voc_to_yolo(x_min, y_min, x_max, y_max, image_w, image_h):
@@ -21,7 +20,7 @@ def pascal_voc_to_yolo(x_min, y_min, x_max, y_max, image_w, image_h):
 # ===========================================================
 
 
-def export(arm, frame_start, frame_end):
+def export(arm, frame_start, frame_end, txt_path):
     arm = bpy.data.objects[arm]
     print(arm)
     # ===========================================================

@@ -29,14 +29,14 @@ from bpy.props import PointerProperty
 
 from .ui import (
     ImportVideoOperator,
-    ImportVideoPanel,
+    UiPanel,
     AddBoundingBoxOperator,
     ExportData,
 )
 
 classes = [
     ImportVideoOperator,
-    ImportVideoPanel,
+    UiPanel,
     AddBoundingBoxOperator,
     ExportData,
 ]
