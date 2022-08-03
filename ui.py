@@ -2,7 +2,8 @@ import bpy
 import os
 from bpy_extras.io_utils import ImportHelper
 from bpy.types import Operator
-from bpy.props import StringProperty
+
+# from bpy.props import StringProperty
 
 from . import import_video, bounding_box, export_data
 
@@ -43,8 +44,8 @@ class ImportVideoOperator(Operator, ImportHelper):
 
         filename, extension = os.path.splitext(self.filepath)
 
-        print("File name:", filename)
-        print("File extension:", extension)
+        # print("File name:", filename)
+        # print("File extension:", extension)
 
         import_video.camera_set_up(self.filepath)
 
@@ -85,17 +86,17 @@ class ExportData(Operator, ImportHelper):
 
             # get amrature obj selected by user
             target_obj = context.scene.target
+
             if target_obj == None:
                 self.report({"ERROR"}, f"No object selected")
             else:
+                t_name = target_obj.name
                 if target_obj.type != "ARMATURE":
-                    self.report(
-                        {"ERROR"}, f"Object '{target_obj.name}' isn't a armature"
-                    )
+                    self.report({"ERROR"}, f"Object '{t_name}' isn't armature")
                 else:
                     frame_start = bpy.context.scene.frame_start
                     frame_end = bpy.context.scene.frame_end
-                    print(target_obj.name, frame_start, frame_end)
+                    print(t_name, frame_start, frame_end)
                     export_data.export(
                         target_obj.name,
                         frame_start,
@@ -105,6 +106,30 @@ class ExportData(Operator, ImportHelper):
         else:
             self.report({"ERROR"}, f"Path selected isn't a folder")
         return {"FINISHED"}
+
+
+# ===========================================================
+class MATERIAL_UL_matslots_example(bpy.types.UIList):
+    def draw_item(
+        self, context, layout, data, item, icon, active_data, active_propname
+    ):
+        ob = data
+        slot = item
+        ma = slot.material
+        # draw_item must handle the three layout types... Usually 'DEFAULT' and 'COMPACT' can share the same code.
+        if self.layout_type in {"DEFAULT", "COMPACT"}:
+            # You should always start your row layout by a label (icon + text), or a non-embossed text field,
+            # this will also make the row easily selectable in the list! The later also enables ctrl-click rename.
+            # We use icon_value of label, as our given icon is an integer value, not an enum ID.
+            # Note "data" names should never be translated!
+            if ma:
+                layout.prop(ma, "name", text="", emboss=False, icon_value=icon)
+            else:
+                layout.label(text="", translate=False, icon_value=icon)
+        # 'GRID' layout type should be as compact as possible (typically a single icon!).
+        elif self.layout_type in {"GRID"}:
+            layout.alignment = "CENTER"
+            layout.label(text="", icon_value=icon)
 
 
 # ===========================================================
@@ -142,3 +167,14 @@ class UiPanel(bpy.types.Panel):
         )
 
         col.operator("opr.export_operator", text="Export data")
+
+        obj = context.object
+        layout.template_list(
+            "MATERIAL_UL_matslots_example",
+            "compact",
+            obj,
+            "material_slots",
+            obj,
+            "active_material_index",
+            type="COMPACT",
+        )

@@ -12,11 +12,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 bl_info = {
-    "name": "labeing bones",
+    "name": "Blender Labelling Tool",
     "author": "demania",
     "description": "",
     "blender": (2, 80, 0),
-    "version": (0, 0, 5),
+    "version": (0, 0, 6),
     "location": "",
     "warning": "",
     "category": "Generic",
@@ -32,6 +32,7 @@ from .ui import (
     UiPanel,
     AddBoundingBoxOperator,
     ExportData,
+    MATERIAL_UL_matslots_example,
 )
 
 classes = [
@@ -39,6 +40,7 @@ classes = [
     UiPanel,
     AddBoundingBoxOperator,
     ExportData,
+    MATERIAL_UL_matslots_example,
 ]
 
 
