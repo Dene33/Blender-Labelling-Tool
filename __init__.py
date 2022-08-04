@@ -16,7 +16,7 @@ bl_info = {
     "author": "demania",
     "description": "",
     "blender": (2, 80, 0),
-    "version": (0, 0, 6),
+    "version": (0, 0, 7),
     "location": "",
     "warning": "",
     "category": "Generic",
@@ -33,6 +33,7 @@ from .ui import (
     AddBoundingBoxOperator,
     ExportData,
     MATERIAL_UL_matslots_example,
+    WM_textOp,
 )
 
 classes = [
@@ -41,6 +42,7 @@ classes = [
     AddBoundingBoxOperator,
     ExportData,
     MATERIAL_UL_matslots_example,
+    WM_textOp,
 ]
 
 

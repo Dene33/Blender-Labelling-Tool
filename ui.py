@@ -133,6 +133,26 @@ class MATERIAL_UL_matslots_example(bpy.types.UIList):
 
 
 # ===========================================================
+
+
+class WM_textOp(Operator):
+    bl_idname = "wm.textop"
+    bl_label = "text tool"
+    bl_options = {"REGISTER", "UNDO"}
+
+    # text = bpy.props.StringParameter(name="enter class")
+    class_name: bpy.props.StringProperty(name="Class Name", default="")
+    class_id: bpy.props.IntProperty(name="Class ID", default=1)
+
+    def execute(self, context):
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
+
+# ===========================================================
+
 bpy.types.Scene.target = bpy.props.PointerProperty(type=bpy.types.Object)
 
 
@@ -146,35 +166,49 @@ class UiPanel(bpy.types.Panel):
     def draw(self, context):
 
         col = self.layout.column()
+        row = col.row()
+        layout = self.layout
+
         col.operator("opr.import_video", text="Import Video")
 
-        for (prop_name, _) in PROPS:
-            row = col.row()
-            row.prop(context.scene, prop_name)
+        box = layout.box()
+        # row = box.row()
+        box.label(text="Bounding Box")
+        box.prop(context.scene, "bounding_box")
+        box.prop(context.scene, "bounding_box_obj")
+        box.prop(context.scene, "my_color")
+        box.operator("opr.bounding_box_operator", text="Add Bounding Box")
+        # col = box.row()
 
-        col.operator("opr.bounding_box_operator", text="Add Bounding Box")
+        # for (prop_name, _) in PROPS:
+        #     row = col.row()
+        #     print(prop_name)
+        #     row.prop(context.scene, prop_name)
 
-        layout = self.layout
-        col = layout.column()
         # layout.prop(bpy.data.objects, "objects")
 
-        self.layout.prop_search(
-            bpy.context.scene,
-            "target",
-            bpy.context.scene,
-            "objects",
-            text="Select Bounding Box",
-        )
+        box = layout.box()
+        # row = box.row()
+        box.label(text="Export Data")
 
-        col.operator("opr.export_operator", text="Export data")
+        # self.layout.prop_search(
+        #     bpy.context.scene,
+        #     "target",
+        #     bpy.context.scene,
+        #     "objects",
+        #     text="Select Bounding Box",
+        # )
 
-        obj = context.object
-        layout.template_list(
-            "MATERIAL_UL_matslots_example",
-            "compact",
-            obj,
-            "material_slots",
-            obj,
-            "active_material_index",
-            type="COMPACT",
-        )
+        box.operator("opr.export_operator", text="Export data")
+        box.operator("wm.textop", text="Class name & id")
+
+        # obj = context.object
+        # layout.template_list(
+        #     "MATERIAL_UL_matslots_example",
+        #     "compact",
+        #     obj,
+        #     "material_slots",
+        #     obj,
+        #     "active_material_index",
+        #     type="COMPACT",
+        # )
