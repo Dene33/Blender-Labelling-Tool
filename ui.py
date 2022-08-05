@@ -10,12 +10,12 @@ from . import import_video, bounding_box, export_data
 PROPS = [
     (
         "bounding_box",
-        bpy.props.StringProperty(name="bounding_box", default="bb"),
+        bpy.props.StringProperty(name="box name", default="bb"),
     ),
-    (
-        "bounding_box_obj",
-        bpy.props.StringProperty(name="bounding_box_obj", default="bbo"),
-    ),
+    # (
+    #     "bounding_box_obj",
+    #     bpy.props.StringProperty(name="bounding_box_obj", default="bbo"),
+    # ),
     (
         "class_id",
         bpy.props.StringProperty(name="class_id", default="class id"),
@@ -85,7 +85,8 @@ class ExportData(Operator, ImportHelper):
             print("File name:", file_path)
 
             # get amrature obj selected by user
-            target_obj = context.scene.target
+            # target_obj = context.scene.target
+            target_obj = bpy.context.active_object
 
             if target_obj == None:
                 self.report({"ERROR"}, f"No object selected")
@@ -110,6 +111,18 @@ class ExportData(Operator, ImportHelper):
 
 # ===========================================================
 class MATERIAL_UL_matslots_example(bpy.types.UIList):
+    # The draw_item function is called for each item of the collection that is visible in the list.
+    #   data is the RNA object containing the collection,
+    #   item is the current drawn item of the collection,
+    #   icon is the "computed" icon for the item (as an integer, because some objects like materials or textures
+    #   have custom icons ID, which are not available as enum items).
+    #   active_data is the RNA object containing the active property for the collection (i.e. integer pointing to the
+    #   active item of the collection).
+    #   active_propname is the name of the active property (use 'getattr(active_data, active_propname)').
+    #   index is index of the current item in the collection.
+    #   flt_flag is the result of the filtering process for this item.
+    #   Note: as index and flt_flag are optional arguments, you do not have to use/declare them here if you don't
+    #         need them.
     def draw_item(
         self, context, layout, data, item, icon, active_data, active_propname
     ):
@@ -127,7 +140,7 @@ class MATERIAL_UL_matslots_example(bpy.types.UIList):
             else:
                 layout.label(text="", translate=False, icon_value=icon)
         # 'GRID' layout type should be as compact as possible (typically a single icon!).
-        elif self.layout_type in {"GRID"}:
+        elif self.layout_type == "GRID":
             layout.alignment = "CENTER"
             layout.label(text="", icon_value=icon)
 
@@ -137,7 +150,7 @@ class MATERIAL_UL_matslots_example(bpy.types.UIList):
 
 class WM_textOp(Operator):
     bl_idname = "wm.textop"
-    bl_label = "text tool"
+    bl_label = "Class name and ID"
     bl_options = {"REGISTER", "UNDO"}
 
     # text = bpy.props.StringParameter(name="enter class")
@@ -153,7 +166,27 @@ class WM_textOp(Operator):
 
 # ===========================================================
 
-bpy.types.Scene.target = bpy.props.PointerProperty(type=bpy.types.Object)
+
+class AddEntry(bpy.types.UIList):
+    def draw_item(
+        self, context, layout, data, item, icon, active_data, active_propname
+    ):
+        print(
+            f"self {self} \n context {context} \n layout {layout} \n data {data} \n item {item} \n icon {icon} \n active_data {active_data} \n active_propname {active_propname} \n "
+        )
+
+        scene = data
+        ob = item
+        # print(data, item, active_data, active_propname)
+
+        if self.layout_type in {"DEFAULT", "COMPACT"}:
+
+            layout.prop(ob, "name", text="", emboss=False, icon_value=layout.icon(ob))
+
+
+# ===========================================================
+
+# bpy.types.Scene.target = bpy.props.PointerProperty(type=bpy.types.Object)
 
 
 class UiPanel(bpy.types.Panel):
@@ -166,7 +199,7 @@ class UiPanel(bpy.types.Panel):
     def draw(self, context):
 
         col = self.layout.column()
-        row = col.row()
+        # row = col.row()
         layout = self.layout
 
         col.operator("opr.import_video", text="Import Video")
@@ -175,40 +208,44 @@ class UiPanel(bpy.types.Panel):
         # row = box.row()
         box.label(text="Bounding Box")
         box.prop(context.scene, "bounding_box")
-        box.prop(context.scene, "bounding_box_obj")
         box.prop(context.scene, "my_color")
         box.operator("opr.bounding_box_operator", text="Add Bounding Box")
         # col = box.row()
 
         # for (prop_name, _) in PROPS:
         #     row = col.row()
-        #     print(prop_name)
         #     row.prop(context.scene, prop_name)
 
-        # layout.prop(bpy.data.objects, "objects")
-
         box = layout.box()
-        # row = box.row()
         box.label(text="Export Data")
 
-        # self.layout.prop_search(
-        #     bpy.context.scene,
-        #     "target",
-        #     bpy.context.scene,
-        #     "objects",
-        #     text="Select Bounding Box",
-        # )
+        # self.layout.prop_search(bpy.context.scene,"target",bpy.context.scene,"objects",text="Select Bounding Box")
 
         box.operator("opr.export_operator", text="Export data")
-        box.operator("wm.textop", text="Class name & id")
+        # box.operator("wm.textop", text="Class name & id")
+
+        # ===========================================================
+
+        obj = context.object
+        layout.template_list(
+            "MATERIAL_UL_matslots_example",
+            "compact",
+            obj,
+            "material_slots",
+            obj,
+            "active_material_index",
+            type="COMPACT",
+        )
 
         # obj = context.object
-        # layout.template_list(
-        #     "MATERIAL_UL_matslots_example",
-        #     "compact",
+        # scn = context.scene
+        # layout = self.layout
+        # # col = layout.column()
+        # col.template_list(
+        #     "AddEntry",
+        #     "",
         #     obj,
-        #     "material_slots",
+        #     "objects",
         #     obj,
-        #     "active_material_index",
-        #     type="COMPACT",
+        #     "active_object_index",
         # )

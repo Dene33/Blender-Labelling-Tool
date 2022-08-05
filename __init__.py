@@ -34,6 +34,7 @@ from .ui import (
     ExportData,
     MATERIAL_UL_matslots_example,
     WM_textOp,
+    AddEntry,
 )
 
 classes = [
@@ -43,6 +44,7 @@ classes = [
     ExportData,
     MATERIAL_UL_matslots_example,
     WM_textOp,
+    AddEntry,
 ]
 
 
