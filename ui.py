@@ -1,7 +1,8 @@
 import bpy
 import os
 from bpy_extras.io_utils import ImportHelper
-from bpy.types import Operator
+
+from bpy.types import Operator, Panel, PropertyGroup, UIList
 
 # from bpy.props import StringProperty
 
@@ -12,10 +13,6 @@ PROPS = [
         "bounding_box",
         bpy.props.StringProperty(name="box name", default="bb"),
     ),
-    # (
-    #     "bounding_box_obj",
-    #     bpy.props.StringProperty(name="bounding_box_obj", default="bbo"),
-    # ),
     (
         "class_id",
         bpy.props.StringProperty(name="class_id", default="class id"),
@@ -110,7 +107,28 @@ class ExportData(Operator, ImportHelper):
 
 
 # ===========================================================
-class MATERIAL_UL_matslots_example(bpy.types.UIList):
+
+
+class WM_textOp(Operator):
+    bl_idname = "wm.textop"
+    bl_label = "Class name and ID"
+    bl_options = {"REGISTER", "UNDO"}
+
+    # text = bpy.props.StringParameter(name="enter class")
+    class_name: bpy.props.StringProperty(name="Class Name", default="")
+    class_id: bpy.props.IntProperty(name="Class ID", default=1)
+
+    def execute(self, context):
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
+
+# ===========================================================
+
+
+class MATERIAL_UL_matslots_example(UIList):
     # The draw_item function is called for each item of the collection that is visible in the list.
     #   data is the RNA object containing the collection,
     #   item is the current drawn item of the collection,
@@ -135,6 +153,7 @@ class MATERIAL_UL_matslots_example(bpy.types.UIList):
             # this will also make the row easily selectable in the list! The later also enables ctrl-click rename.
             # We use icon_value of label, as our given icon is an integer value, not an enum ID.
             # Note "data" names should never be translated!
+            # layout.label(text="txt")
             if ma:
                 layout.prop(ma, "name", text="", emboss=False, icon_value=icon)
             else:
@@ -148,40 +167,107 @@ class MATERIAL_UL_matslots_example(bpy.types.UIList):
 # ===========================================================
 
 
-class WM_textOp(Operator):
-    bl_idname = "wm.textop"
-    bl_label = "Class name and ID"
-    bl_options = {"REGISTER", "UNDO"}
+class CUSTOM_OT_actions(Operator):
+    """Move items up and down, add and remove"""
 
-    # text = bpy.props.StringParameter(name="enter class")
-    class_name: bpy.props.StringProperty(name="Class Name", default="")
-    class_id: bpy.props.IntProperty(name="Class ID", default=1)
+    bl_idname = "custom.list_action"
+    bl_label = "List Actions"
+    bl_description = "Move items up and down, add and remove"
+    bl_options = {"REGISTER"}
 
-    def execute(self, context):
-        return {"FINISHED"}
+    action: bpy.props.EnumProperty(
+        items=(
+            # ("UP", "Up", ""),
+            # ("DOWN", "Down", ""),
+            ("REMOVE", "Remove", ""),
+            ("ADD", "Add", ""),
+        )
+    )
+
+    def random_color(self):
+        from mathutils import Color
+        from random import random
+
+        return Color((random(), random(), random()))
 
     def invoke(self, context, event):
-        return context.window_manager.invoke_props_dialog(self)
+        scn = context.scene
+        idx = scn.custom_index
+
+        try:
+            item = scn.custom[idx]
+        except IndexError:
+            pass
+        else:
+            if self.action == "DOWN" and idx < len(scn.custom) - 1:
+                item_next = scn.custom[idx + 1].name
+                scn.custom.move(idx, idx + 1)
+                scn.custom_index += 1
+                info = 'Item "%s" moved to position %d' % (
+                    item.name,
+                    scn.custom_index + 1,
+                )
+                self.report({"INFO"}, info)
+
+            elif self.action == "UP" and idx >= 1:
+                item_prev = scn.custom[idx - 1].name
+                scn.custom.move(idx, idx - 1)
+                scn.custom_index -= 1
+                info = 'Item "%s" moved to position %d' % (
+                    item.name,
+                    scn.custom_index + 1,
+                )
+                self.report({"INFO"}, info)
+
+            elif self.action == "REMOVE":
+                item = scn.custom[scn.custom_index]
+                mat = item.material
+                if mat:
+                    mat_obj = bpy.data.materials.get(mat.name, None)
+                    if mat_obj:
+                        bpy.data.materials.remove(mat_obj, do_unlink=True)
+                info = "Item %s removed from scene" % (item)
+                scn.custom.remove(idx)
+                if scn.custom_index == 0:
+                    scn.custom_index = 0
+                else:
+                    scn.custom_index -= 1
+                self.report({"INFO"}, info)
+
+        if self.action == "ADD":
+            item = scn.custom.add()
+            item.id = len(scn.custom)
+            item.material = bpy.data.materials.new(name="Material")
+            item.name = item.material.name
+            col = self.random_color()
+            item.material.diffuse_color = (col.r, col.g, col.b, 1.0)
+            scn.custom_index = len(scn.custom) - 1
+            info = "%s added to list" % (item.name)
+            self.report({"INFO"}, info)
+        return {"FINISHED"}
 
 
 # ===========================================================
 
 
-class AddEntry(bpy.types.UIList):
+class CUSTOM_UL_items(UIList):
     def draw_item(
-        self, context, layout, data, item, icon, active_data, active_propname
+        self, context, layout, data, item, icon, active_data, active_propname, index
     ):
-        print(
-            f"self {self} \n context {context} \n layout {layout} \n data {data} \n item {item} \n icon {icon} \n active_data {active_data} \n active_propname {active_propname} \n "
-        )
-
-        scene = data
-        ob = item
-        # print(data, item, active_data, active_propname)
-
+        mat = item.material
         if self.layout_type in {"DEFAULT", "COMPACT"}:
+            split = layout.split(factor=0.3)
+            split.label(text="Index: %d" % (index))
+            # static method UILayout.icon returns the integer value of the icon ID
+            # "computed" for the given RNA object.
+            split.prop(mat, "name", text="", emboss=False, icon_value=layout.icon(mat))
 
-            layout.prop(ob, "name", text="", emboss=False, icon_value=layout.icon(ob))
+        elif self.layout_type in {"GRID"}:
+            layout.alignment = "LEFT"
+            layout.label(text="", icon_value=layout.icon(mat))
+
+    def invoke(self, context, event):
+        pass
 
 
 # ===========================================================
@@ -189,7 +275,7 @@ class AddEntry(bpy.types.UIList):
 # bpy.types.Scene.target = bpy.props.PointerProperty(type=bpy.types.Object)
 
 
-class UiPanel(bpy.types.Panel):
+class UiPanel(Panel):
     bl_idname = "VIEW3D_PT_ui"
     bl_label = "Blender Labelling Tool"
     bl_category = "Blender Labelling Tool"
@@ -199,6 +285,7 @@ class UiPanel(bpy.types.Panel):
     def draw(self, context):
 
         col = self.layout.column()
+        scn = bpy.context.scene
         # row = col.row()
         layout = self.layout
 
@@ -224,28 +311,24 @@ class UiPanel(bpy.types.Panel):
         box.operator("opr.export_operator", text="Export data")
         # box.operator("wm.textop", text="Class name & id")
 
-        # ===========================================================
+        # # ===========================================================
 
-        obj = context.object
-        layout.template_list(
-            "MATERIAL_UL_matslots_example",
-            "compact",
-            obj,
-            "material_slots",
-            obj,
-            "active_material_index",
-            type="COMPACT",
+        box = layout.box()
+        box.label(text="Class id")
+        rows = 2
+        box.template_list(
+            "CUSTOM_UL_items",
+            "custom_def_list",
+            scn,
+            "custom",
+            scn,
+            "custom_index",
+            rows=2,
         )
 
-        # obj = context.object
-        # scn = context.scene
-        # layout = self.layout
-        # # col = layout.column()
-        # col.template_list(
-        #     "AddEntry",
-        #     "",
-        #     obj,
-        #     "objects",
-        #     obj,
-        #     "active_object_index",
-        # )
+        box = box.column(align=True)
+        box.operator(CUSTOM_OT_actions.bl_idname, icon="ADD", text="").action = "ADD"
+        box.operator(
+            CUSTOM_OT_actions.bl_idname, icon="REMOVE", text=""
+        ).action = "REMOVE"
+        box.separator()

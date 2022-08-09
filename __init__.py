@@ -22,6 +22,8 @@ bl_info = {
     "category": "Generic",
 }
 
+# ===========================================================
+
 
 import bpy
 from bpy.props import PointerProperty
@@ -33,9 +35,22 @@ from .ui import (
     AddBoundingBoxOperator,
     ExportData,
     MATERIAL_UL_matslots_example,
-    WM_textOp,
-    AddEntry,
+    # WM_textOp,
+    CUSTOM_OT_actions,
+    CUSTOM_UL_items,
 )
+
+# ===========================================================
+
+
+from bpy.types import PropertyGroup
+from bpy.props import IntProperty, CollectionProperty
+
+
+class CUSTOM_PG_materialCollection(PropertyGroup):
+    # name: StringProperty() -> Instantiated by default
+    material: PointerProperty(name="Material", type=bpy.types.Material)
+
 
 classes = [
     ImportVideoOperator,
@@ -43,9 +58,12 @@ classes = [
     AddBoundingBoxOperator,
     ExportData,
     MATERIAL_UL_matslots_example,
-    WM_textOp,
-    AddEntry,
+    # WM_textOp,
+    CUSTOM_OT_actions,
+    CUSTOM_UL_items,
+    CUSTOM_PG_materialCollection,
 ]
+# ===========================================================
 
 
 def register():
@@ -55,6 +73,9 @@ def register():
     for c in classes:
         bpy.utils.register_class(c)
     # bpy.types.Scene.my_tool = PointerProperty(type=MyProperties)
+    # Custom scene properties
+    bpy.types.Scene.custom = CollectionProperty(type=CUSTOM_PG_materialCollection)
+    bpy.types.Scene.custom_index = IntProperty()
 
 
 def unregister():
