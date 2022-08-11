@@ -123,20 +123,20 @@ class ExportData(Operator, ImportHelper):
 # ===========================================================
 
 
-class WM_textOp(Operator):
-    bl_idname = "wm.textop"
-    bl_label = "Class name and ID"
-    bl_options = {"REGISTER", "UNDO"}
+# class WM_textOp(Operator):
+#     bl_idname = "wm.textop"
+#     bl_label = "Class name and ID"
+#     bl_options = {"REGISTER", "UNDO"}
 
-    # text = bpy.props.StringParameter(name="enter class")
-    class_name: bpy.props.StringProperty(name="Class Name", default="")
-    class_id: bpy.props.IntProperty(name="Class ID", default=1)
+#     # text = bpy.props.StringParameter(name="enter class")
+#     class_name: bpy.props.StringProperty(name="Class Name", default="")
+#     class_id: bpy.props.IntProperty(name="Class ID", default=1)
 
-    def execute(self, context):
-        return {"FINISHED"}
+#     def execute(self, context):
+#         return {"FINISHED"}
 
-    def invoke(self, context, event):
-        return context.window_manager.invoke_props_dialog(self)
+#     def invoke(self, context, event):
+#         return context.window_manager.invoke_props_dialog(self)
 
 
 # ===========================================================
@@ -150,9 +150,6 @@ class CUSTOM_OT_actions(Operator):
     bl_description = "Move items up and down, add and remove"
     bl_options = {"REGISTER"}
 
-    class_name: bpy.props.StringProperty(name="class", default="class")
-    id: bpy.props.IntProperty(name="id", default=0, min=0)
-
     action: bpy.props.EnumProperty(
         items=(
             # ("UP", "Up", ""),
@@ -162,24 +159,24 @@ class CUSTOM_OT_actions(Operator):
         )
     )
 
-    # def random_color(self):
-    #     from mathutils import Color
-    #     from random import random
-    #     return Color((random(), random(), random()))
-
     def invoke(self, context, event):
         scn = context.scene
         idx = scn.custom_index
+        scn.int_index_prop = context.scene.id
+        scn.class_name_prop = context.scene.class_name
+        # print(
+        #     f"int_index_prop           {scn.int_index_prop} {type(scn.int_index_prop)}"
+        # )
+        # print(
+        #     f"class_name_prop          {scn.class_name_prop} {type(scn.class_name_prop)}"
+        # )
 
-        print(f"idx {idx} ")
-        print(f"custom_index {scn.custom_index} ")
-        print(f"scn.custom {scn.custom} {type(scn.custom)} ")
         try:
             item = scn.custom[idx]
         except IndexError:
             pass
         else:
-            # if self.action == "DOWN" and idx < len(scn.custom) - 1:
+            # if self.action == "DOWN" and idx < c - 1:
             #     item_next = scn.custom[idx + 1].name
             #     scn.custom.move(idx, idx + 1)
             #     scn.custom_index += 1
@@ -199,32 +196,34 @@ class CUSTOM_OT_actions(Operator):
             #     )
             #     self.report({"INFO"}, info)
 
+            # elif self.action == "REMOVE":
             if self.action == "REMOVE":
-                item = scn.custom[scn.custom_index]
-                mat = item.material
-                if mat:
-                    mat_obj = bpy.data.materials.get(mat.name, None)
-                    if mat_obj:
-                        bpy.data.materials.remove(mat_obj, do_unlink=True)
-                info = f"Item {item} removed from scene"
-                scn.custom.remove(idx)
-                if scn.custom_index == 0:
-                    scn.custom_index = 0
-                else:
-                    scn.custom_index -= 1
-                self.report({"INFO"}, info)
+                print("Remove")
+                # item = scn.custom[scn.custom_index]
+                # mat = item.material
+                # if mat:
+                #     mat_obj = bpy.data.materials.get(mat.name, None)
+                #     if mat_obj:
+                #         bpy.data.materials.remove(mat_obj, do_unlink=True)
+                # info = f"Item {item} removed from scene"
+                # scn.custom.remove(idx)
+                # if scn.custom_index == 0:
+                #     scn.custom_index = 0
+                # else:
+                #     scn.custom_index -= 1
+                # self.report({"INFO"}, info)
 
         if self.action == "ADD":
-            item = scn.custom.add()
-            item.id = len(scn.custom)
-            print(f"item {item} ")
-            item.material = bpy.data.materials.new(name=context.scene.class_name)
-            item.name = item.material.name
-            # col = self.random_color()
-            # item.material.diffuse_color = (col.r, col.g, col.b, 1.0)
-            scn.custom_index = len(scn.custom) - 1
-            info = "%s added to list" % (item.name)
-            self.report({"INFO"}, info)
+            print("ADD")
+            # item = scn.custom.add()
+            # item.id = len(scn.custom)
+            # item.material = bpy.data.materials.new(name="Material")
+            # item.name = item.material.name
+            # # col = self.random_color()
+            # # item.material.diffuse_color = (col.r, col.g, col.b, 1.0)
+            # scn.custom_index = len(scn.custom) - 1
+            # info = "%s added to list" % (item.name)
+            # self.report({"INFO"}, info)
         return {"FINISHED"}
 
 
@@ -235,22 +234,53 @@ class CUSTOM_UL_items(UIList):
     def draw_item(
         self, context, layout, data, item, icon, active_data, active_propname, index
     ):
-        mat = item.material
-        if self.layout_type in {"DEFAULT", "COMPACT"}:
-            split = layout.split(factor=0.3)
-            # split.label(text=f"Index: {context.scene.id}")
-            split.label(text=f"Index: {index}")
-            # static method UILayout.icon returns the integer value of the icon ID
-            # "computed" for the given RNA object.
-            split.prop(mat, "name", text="", emboss=True)
-            split.prop(mat, "name", text="txt", emboss=True)
+        print(
+            f"int_index_prop           {scn.int_index_prop} {type(scn.int_index_prop)}"
+        )
+        print(
+            f"class_name_prop          {scn.class_name_prop} {type(scn.class_name_prop)}"
+        )
+        print("\n\n\n")
+        print(f"self  {self}")
+        print(f"context  {context}")
+        # print(f"layout  {layout}")
+        # print(f"data  {data.name}")
+        # print(f"item  {item}")
+        # print(f"icon  {icon}")
+        # print(f"active_data  {active_data}")
+        # print(f"active_propname  {active_propname}")
+        # print(f"index  {index}")
+        # mat = item.material
+        # if self.layout_type in {"DEFAULT", "COMPACT"}:
+        #     split = layout.split(factor=0.3)
+        #     split.label(text="Index: %d" % (index))
+        #     # static method UILayout.icon returns the integer value of the icon ID
+        #     # "computed" for the given RNA object.
+        #     split.prop(mat, "name", text="", emboss=False, icon_value=layout.icon(mat))
 
-        elif self.layout_type in {"GRID"}:
-            layout.alignment = "LEFT"
-            layout.label(text="", icon_value=layout.icon(mat))
+        # elif self.layout_type in {"GRID"}:
+        #     layout.alignment = "CENTER"
+        #     layout.label(text="", icon_value=layout.icon(mat))
 
     def invoke(self, context, event):
         pass
+
+
+# ===========================================================
+
+from bpy.props import PointerProperty
+
+
+class CUSTOM_PG_materialCollection(PropertyGroup):
+    # name: StringProperty() -> Instantiated by default
+    material: PointerProperty(name="Material", type=bpy.types.Material)
+    # class_name_prop: bpy.props.StringProperty(name="class", default="class")
+    # id_prop: bpy.props.IntProperty(name="id", default=0, min=0)
+
+
+class CUSTOM_PG_Collection(PropertyGroup):
+    class_name_prop: bpy.props.StringProperty(name="class", default="class")
+    id_prop: bpy.props.IntProperty(name="id", default=0, min=0)
 
 
 # ===========================================================
@@ -273,53 +303,55 @@ class UiPanel(Panel):
 
         col.operator("opr.import_video", text="Import Video")
 
+        # # ===========================================================
+
         box = layout.box()
-        # row = box.row()
         box.label(text="Bounding Box")
         box.prop(context.scene, "bounding_box")
         box.prop(context.scene, "my_color")
         box.operator("opr.bounding_box_operator", text="Add Bounding Box")
-        # col = box.row()
-
-        # for (prop_name, _) in PROPS:
-        #     row = col.row()
-        #     row.prop(context.scene, prop_name)
-
-        box = layout.box()
-        box.label(text="Export Data")
-
-        # self.layout.prop_search(bpy.context.scene,"target",bpy.context.scene,"objects",text="Select Bounding Box")
-
-        box.operator("opr.export_operator", text="Export data")
-        # box.operator("wm.textop", text="Class name & id")
+        box.separator()
 
         # # ===========================================================
 
         box = layout.box()
-        box.label(text="Class id")
+        box.label(text="Export Data")
+        # self.layout.prop_search(bpy.context.scene,"target",bpy.context.scene,"objects",text="Select Bounding Box")
+        col = box.column(align=True)
+        row = col.row(align=True)
 
-        rows = 2
-        box.template_list(
+        if context.selected_objects:
+            row.operator("opr.export_operator", text="Export data")
+        else:
+            row.enabled = False
+            row.operator("opr.export_operator", text="select armature first")
+        # box.operator("wm.textop", text="Class name & id")
+        box.separator()
+
+        # # ===========================================================
+
+        box2 = layout.box()
+        box2.label(text="Class id")
+
+        box2.template_list(
             "CUSTOM_UL_items",
             "custom_def_list",
             scn,
             "custom",
             scn,
             "custom_index",
-            rows=4,
+            rows=2,
         )
-        box.separator()
+        box2.separator()
 
-        # class_props = self.layout.operator(CUSTOM_OT_actions.bl_idname)
-        # class_props.class_name = box.prop(context.scene, "class_name")
-        # class_props.id = box.prop(context.scene, "id")
+        col = box2.column(align=True)
+        row = col.row(align=False)
+        row.prop(context.scene, "class_name")
+        row.prop(context.scene, "id")
 
-        col.prop(context.scene, "class_name")
-        col.prop(context.scene, "id")
-        box.separator()
+        # box2.prop(context.scene, "class_name")
+        # box2.prop(context.scene, "id")
+        # box2.separator()
 
-        box = box.column(align=True)
-        box.operator(CUSTOM_OT_actions.bl_idname, icon="ADD", text="").action = "ADD"
-        box.operator(
-            CUSTOM_OT_actions.bl_idname, icon="REMOVE", text=""
-        ).action = "REMOVE"
+        box2.operator("custom.list_action", icon="ADD", text="").action = "ADD"
+        box2.operator("custom.list_action", icon="REMOVE", text="").action = "REMOVE"

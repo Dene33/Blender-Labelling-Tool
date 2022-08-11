@@ -26,7 +26,6 @@ bl_info = {
 
 
 import bpy
-from bpy.props import PointerProperty
 
 
 from .ui import (
@@ -37,18 +36,14 @@ from .ui import (
     # WM_textOp,
     CUSTOM_OT_actions,
     CUSTOM_UL_items,
+    CUSTOM_PG_materialCollection,
+    CUSTOM_PG_Collection,
 )
 
 # ===========================================================
 
 
-from bpy.types import PropertyGroup
 from bpy.props import IntProperty, CollectionProperty
-
-
-class CUSTOM_PG_materialCollection(PropertyGroup):
-    # name: StringProperty() -> Instantiated by default
-    material: PointerProperty(name="Material", type=bpy.types.Material)
 
 
 classes = [
@@ -60,6 +55,7 @@ classes = [
     CUSTOM_OT_actions,
     CUSTOM_UL_items,
     CUSTOM_PG_materialCollection,
+    CUSTOM_PG_Collection,
 ]
 # ===========================================================
 
@@ -73,12 +69,21 @@ def register():
     # bpy.types.Scene.my_tool = PointerProperty(type=MyProperties)
     # Custom scene properties
     bpy.types.Scene.custom = CollectionProperty(type=CUSTOM_PG_materialCollection)
+    bpy.types.Scene.custom_2 = CollectionProperty(type=CUSTOM_PG_Collection)
+    bpy.types.Scene.class_n_prop = bpy.props.StringProperty(
+        name="class name test",
+    )
+    # bpy.types.Scene.custom = CollectionProperty()
     bpy.types.Scene.custom_index = IntProperty()
+    bpy.types.Scene.int_index_prop = IntProperty()
+    bpy.types.Scene.class_name_prop = bpy.props.StringProperty(name="class name test")
 
 
 def unregister():
     for (prop_name, _) in ui.PROPS:
         delattr(bpy.types.Scene, prop_name)
+
+    del bpy.types.Scene.class_n_prop
 
     for c in classes:
         bpy.utils.unregister_class(c)
