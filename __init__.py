@@ -33,11 +33,12 @@ from .ui import (
     UiPanel,
     AddBoundingBoxOperator,
     ExportData,
-    # WM_textOp,
-    CUSTOM_OT_actions,
-    CUSTOM_UL_items,
-    CUSTOM_PG_materialCollection,
-    CUSTOM_PG_Collection,
+    WM_textOp,
+    GU_PT_collection_custom_properties,
+    # CUSTOM_OT_actions,
+    # CUSTOM_UL_items,
+    # CUSTOM_PG_materialCollection,
+    # CUSTOM_PG_Collection,
 )
 
 # ===========================================================
@@ -51,11 +52,12 @@ classes = [
     UiPanel,
     AddBoundingBoxOperator,
     ExportData,
-    # WM_textOp,
-    CUSTOM_OT_actions,
-    CUSTOM_UL_items,
-    CUSTOM_PG_materialCollection,
-    CUSTOM_PG_Collection,
+    WM_textOp,
+    GU_PT_collection_custom_properties,
+    # CUSTOM_OT_actions,
+    # CUSTOM_UL_items,
+    # CUSTOM_PG_materialCollection,
+    # CUSTOM_PG_Collection,
 ]
 # ===========================================================
 
@@ -66,24 +68,18 @@ def register():
 
     for c in classes:
         bpy.utils.register_class(c)
-    # bpy.types.Scene.my_tool = PointerProperty(type=MyProperties)
+
     # Custom scene properties
-    bpy.types.Scene.custom = CollectionProperty(type=CUSTOM_PG_materialCollection)
-    bpy.types.Scene.custom_2 = CollectionProperty(type=CUSTOM_PG_Collection)
-    bpy.types.Scene.class_n_prop = bpy.props.StringProperty(
-        name="class name test",
-    )
-    # bpy.types.Scene.custom = CollectionProperty()
-    bpy.types.Scene.custom_index = IntProperty()
-    bpy.types.Scene.int_index_prop = IntProperty()
-    bpy.types.Scene.class_name_prop = bpy.props.StringProperty(name="class name test")
+    # bpy.types.Scene.custom = CollectionProperty(type=CUSTOM_PG_materialCollection)
+    # bpy.types.Scene.custom_2 = CollectionProperty(type=CUSTOM_PG_Collection)
+
+    # bpy.types.Scene.int_index_prop = IntProperty()
+    # bpy.types.Scene.class_name_prop = bpy.props.StringProperty(name="class name test")
 
 
 def unregister():
     for (prop_name, _) in ui.PROPS:
         delattr(bpy.types.Scene, prop_name)
-
-    del bpy.types.Scene.class_n_prop
 
     for c in classes:
         bpy.utils.unregister_class(c)

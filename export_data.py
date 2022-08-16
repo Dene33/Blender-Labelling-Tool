@@ -20,7 +20,7 @@ def pascal_voc_to_yolo(x_min, y_min, x_max, y_max, image_w, image_h):
 # ===========================================================
 
 
-def export(arm, frame_start, frame_end, txt_path):
+def export(self, arm, frame_start, frame_end, txt_path):
     arm = bpy.data.objects[arm]
     print(arm)
     # ===========================================================
@@ -36,8 +36,12 @@ def export(arm, frame_start, frame_end, txt_path):
         bones_info[bone.name] = []
 
     # ===========================================================
+    try:
+        cam = bpy.data.objects["Camera"]
+    except:
+        print("no cam")
+        self.report({"ERROR"}, f"No camera in 3D scene")
 
-    cam = bpy.data.objects["Camera"]
     scene = bpy.context.scene
     render_scale = scene.render.resolution_percentage / 100
     render_size = (

@@ -1,6 +1,6 @@
 import bpy
 from math import radians
-from . import import_video
+from . import collection_functional
 import os
 
 os.system("cls")
@@ -58,8 +58,8 @@ def bounding_box_set_up(name, color):
     name = get_new_name(name)
 
     # create collections
-    arm_coll = import_video.create_collection(name)
-    bone_shape_coll = import_video.create_collection("Bone Shapes", True)
+    arm_coll = collection_functional.create_collection(name)
+    bone_shape_coll = collection_functional.create_collection("Bone Shapes", True)
 
     # ===========================================================
     # create plane as custom obj for bone
@@ -306,10 +306,10 @@ def bounding_box_set_up(name, color):
 
     # ===========================================================
     # link objects to collection
-    import_video.link_to_collection(arm_coll, arm)
-    import_video.link_to_collection(bone_shape_coll, plane_custom_obj)
-    import_video.link_to_collection(bone_shape_coll, circle_custom_obj)
-    import_video.link_to_collection(arm_coll, plane)
+    collection_functional.link_to_collection(arm_coll, arm)
+    collection_functional.link_to_collection(bone_shape_coll, plane_custom_obj)
+    collection_functional.link_to_collection(bone_shape_coll, circle_custom_obj)
+    collection_functional.link_to_collection(arm_coll, plane)
 
     plane_custom_obj.hide_set(True)
     circle_custom_obj.hide_set(True)

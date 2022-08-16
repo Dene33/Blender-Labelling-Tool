@@ -78,14 +78,14 @@ class CUSTOM_OT_actions(Operator):
                 item_next = scn.custom[idx+1].name
                 scn.custom.move(idx, idx+1)
                 scn.custom_index += 1
-                info = 'Item "%s" moved to position %d' % (item.name, scn.custom_index + 1)
+                info = f'Item "{item.name}" moved to position {scn.custom_index + 1}'
                 self.report({'INFO'}, info)
 
             elif self.action == 'UP' and idx >= 1:
                 item_prev = scn.custom[idx-1].name
                 scn.custom.move(idx, idx-1)
                 scn.custom_index -= 1
-                info = 'Item "%s" moved to position %d' % (item.name, scn.custom_index + 1)
+                info = f'Item "{item.name}" moved to position {scn.custom_index+1}'
                 self.report({'INFO'}, info)
 
             elif self.action == 'REMOVE':
@@ -95,7 +95,7 @@ class CUSTOM_OT_actions(Operator):
                     mat_obj = bpy.data.materials.get(mat.name, None)
                     if mat_obj:
                         bpy.data.materials.remove(mat_obj, do_unlink=True)
-                info = 'Item %s removed from scene' % (item)
+                info = f'Item {item} removed from scene'
                 scn.custom.remove(idx)
                 if scn.custom_index == 0:
                     scn.custom_index = 0
@@ -111,7 +111,7 @@ class CUSTOM_OT_actions(Operator):
             col = self.random_color()
             item.material.diffuse_color = (col.r, col.g, col.b, 1.0)
             scn.custom_index = (len(scn.custom)-1)
-            info = '%s added to list' % (item.name)
+            info = f'{item.name} added to list'
             self.report({'INFO'}, info)
         return {"FINISHED"}
 
@@ -136,7 +136,7 @@ class CUSTOM_OT_addBlendMaterials(Operator):
                 item.material = mat
                 item.name = item.material.name
                 scn.custom_index = (len(scn.custom)-1)
-                info = '%s added to list' % (item.name)
+                info = f'{item.name} added to list'
                 self.report({'INFO'}, info)
         return{'FINISHED'}
 
@@ -191,7 +191,7 @@ class CUSTOM_OT_clearList(Operator):
                 if i.material:
                     mat_obj = bpy.data.materials.get(i.material.name, None)
                     if mat_obj:
-                        info = 'Item %s removed from scene' % (i.material.name)
+                        info = f'Item {i.material.name} removed from scene'
                         bpy.data.materials.remove(mat_obj, do_unlink=True)
                         
             # Clear the list
@@ -211,7 +211,7 @@ class CUSTOM_UL_items(UIList):
         mat = item.material
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             split = layout.split(factor=0.3)
-            split.label(text="Index: %d" % (index))
+            split.label(text=f"Index: {index}")
             # static method UILayout.icon returns the integer value of the icon ID
             # "computed" for the given RNA object.
             split.prop(mat, "name", text="", emboss=False, icon_value=layout.icon(mat))
