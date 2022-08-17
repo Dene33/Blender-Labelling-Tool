@@ -129,13 +129,10 @@ class WM_textOp(Operator):
     bl_label = "Class name and ID"
     bl_options = {"REGISTER", "UNDO"}
 
-    # text = bpy.props.StringParameter(name="enter class")
     class_name: bpy.props.StringProperty(name="Class Name", default="")
     class_id: bpy.props.IntProperty(name="Class ID", default=0, min=0)
 
     def execute(self, context):
-        print(f"class_name  {self.class_name} ")
-        print(f"class_id    {self.class_id} ")
         new_coll = collection_functional.create_collection(self.class_name, True)
         bpy.data.collections[new_coll].color_tag = "COLOR_05"
 
@@ -145,24 +142,15 @@ class WM_textOp(Operator):
             if collection.name == new_coll:
                 bpy.context.view_layer.active_layer_collection = collection
 
-        print("\n\n")
-        bpy.ops.wm.properties_add(data_path="collection")
+        # if there's no custom property, create one
+        if len(bpy.data.collections[new_coll].keys()) == 0:
+            bpy.ops.wm.properties_add(data_path="collection")
         last_prop = None
         for K in bpy.data.collections[new_coll].keys():
-            print(K)
             last_prop = K
-            # if K not in "_RNA_UI":
-            # print(f"{K} {bpy.data.collections[new_coll][K]}")
+            # if K not in "_RNA_UI":    print(f"{K} {bpy.data.collections[new_coll][K]}")
         print(f"last {last_prop} ")
         bpy.data.collections[new_coll][last_prop] = self.class_id
-        # bpy.data.window_managers["WinMan"].(null) = "test"
-
-        # existing_props = bpy.data.collections[new_coll].values()
-        # copy_list = list(
-        #     set(bpy.data.collections[new_coll].values()) - set(existing_props)
-        # )
-        # print(existing_props, type(existing_props))
-        # print(copy_list)
 
         return {"FINISHED"}
 
