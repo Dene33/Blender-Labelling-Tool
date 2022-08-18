@@ -8,6 +8,8 @@ from bpy.types import Operator, Panel, PropertyGroup, UIList
 
 from . import import_video, bounding_box, export_data, collection_functional
 
+CLASS_ID = None
+
 PROPS = [
     (
         "bounding_box",
@@ -51,13 +53,7 @@ class ImportVideoOperator(Operator, ImportHelper):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        """Do something with the selected file(s)."""
-
-        filename, extension = os.path.splitext(self.filepath)
-
-        # print("File name:", filename)
-        # print("File extension:", extension)
-
+        # filename, extension = os.path.splitext(self.filepath)
         import_video.camera_set_up(self.filepath)
 
         return {"FINISHED"}
@@ -90,34 +86,56 @@ class ExportData(Operator, ImportHelper):
 
     def execute(self, context):
 
+        good_bb = {}
+        restructured_bb = {}  # to further sort objects by id
+
+        # getting colletion with custom props
+        for col in bpy.data.collections:
+            prop = col.get("class_id")
+
+            # getting colletion if it has custom prop and object(s)
+            if prop != None and len(col.all_objects) != 0:
+                for o in col.all_objects:
+                    # getting armature with correct bone names
+                    if o.type == "ARMATURE":
+                        if (
+                            ("root" in o.pose.bones)
+                            and ("top_left" in o.pose.bones)
+                            and ("bottom_right" in o.pose.bones)
+                            and ("top_right" in o.pose.bones)
+                            and ("bottom_left" in o.pose.bones)
+                        ):
+                            # print(f"[+] {o.name} has all bones")
+                            good_bb[o] = prop
+                            restructured_bb[prop] = []
+                        else:
+                            print(f"[-] {o.name} has different bone names")
+
+        # # restructure dict to id : [object]
+        # for k, v in good_bb.items():
+        #     for k2, v2 in restructured_bb.items():
+        #         if v == k2:
+        #             restructured_bb[k2].append(k)
+
+        # ===========================================================
+
         file_path = self.filepath
         # check if inputted path is folder
+        print("File name:", file_path)
         if os.path.isdir(file_path) == True:
-            print("File name:", file_path)
-
-            # get amrature obj selected by user
-            # target_obj = context.scene.target
-            target_obj = bpy.context.active_object
-
-            if target_obj == None:
-                self.report({"ERROR"}, f"No object selected")
-            else:
-                t_name = target_obj.name
-                if target_obj.type != "ARMATURE":
-                    self.report({"ERROR"}, f"Object '{t_name}' isn't armature")
-                else:
-                    frame_start = bpy.context.scene.frame_start
-                    frame_end = bpy.context.scene.frame_end
-                    print(t_name, frame_start, frame_end)
-                    export_data.export(
-                        self,
-                        target_obj.name,
-                        frame_start,
-                        frame_end,
-                        file_path,
-                    )
+            frame_start = bpy.context.scene.frame_start
+            frame_end = bpy.context.scene.frame_end
+            for obj, id in good_bb.items():
+                export_data.export(
+                    self,
+                    obj,
+                    frame_start,
+                    frame_end,
+                    file_path,
+                    id,
+                )
         else:
-            self.report({"ERROR"}, f"Path selected isn't a folder")
+            self.report({"ERROR"}, f"Path selected isn't a folder \n {file_path}")
         return {"FINISHED"}
 
 
@@ -141,16 +159,9 @@ class WM_textOp(Operator):
         for collection in collections:
             if collection.name == new_coll:
                 bpy.context.view_layer.active_layer_collection = collection
-
-        # if there's no custom property, create one
-        if len(bpy.data.collections[new_coll].keys()) == 0:
-            bpy.ops.wm.properties_add(data_path="collection")
-        last_prop = None
-        for K in bpy.data.collections[new_coll].keys():
-            last_prop = K
-            # if K not in "_RNA_UI":    print(f"{K} {bpy.data.collections[new_coll][K]}")
-        print(f"last {last_prop} ")
-        bpy.data.collections[new_coll][last_prop] = self.class_id
+                bpy.data.collections[new_coll]["class_id"] = self.class_id
+                global CLASS_ID
+                CLASS_ID = self.class_id
 
         return {"FINISHED"}
 
@@ -316,12 +327,13 @@ class UiPanel(Panel):
 
         col = box.column(align=True)
         row = col.row(align=True)
-        if context.selected_objects:
-            row.operator("opr.export_operator", text="Export data")
-        else:
-            row.enabled = False
-            row.operator("opr.export_operator", text="select armature first")
-        box.separator()
+        row.operator("opr.export_operator", text="Export data")
+        # if context.selected_objects:
+        #     row.operator("opr.export_operator", text="Export data")
+        # else:
+        #     row.enabled = False
+        #     row.operator("opr.export_operator", text="select armature first")
+        # box.separator()
 
         # # ===========================================================
 
