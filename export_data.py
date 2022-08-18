@@ -105,7 +105,7 @@ def export(self, arm, frame_start, frame_end, txt_path):
 
         # ===========================================================
 
-        filename = f"{txt_path}\\{frame:006}.txt"
+        filename = f"{txt_path}/{frame:006}.txt"
         print(filename)
 
         f = open(filename, "w")
