@@ -6,6 +6,21 @@ import os
 os.system("cls")
 
 # ===========================================================
+def traverse_tree(t):
+    yield t
+    for child in t.children:
+        yield from traverse_tree(child)
+
+
+def parent_lookup(coll):
+    parent_lookup = {}
+    for coll in traverse_tree(coll):
+        for c in coll.children.keys():
+            parent_lookup.setdefault(c, coll)
+    return parent_lookup
+
+
+# ===========================================================
 
 
 def make_bone(obj, b_name, b_parent=None, head=(0, 0, 0), tail=(0.5, 0, 0)):
@@ -54,6 +69,9 @@ def bounding_box_set_up(name, color):
 
     if bpy.context.mode != "OBJECT":
         bpy.ops.object.mode_set(mode="OBJECT")
+
+    # get active collection
+    active_collection = bpy.context.view_layer.active_layer_collection.collection
 
     name = get_new_name(name)
 
@@ -318,6 +336,31 @@ def bounding_box_set_up(name, color):
     arm.select_set(True)
     bpy.context.view_layer.objects.active = arm
     # bpy.ops.object.mode_set(mode="POSE")
+
+    # ===========================================================
+
+    # C = bpy.context
+
+    # # Get all collections of the scene and their parents in a dict
+    # coll_scene = C.scene.collection
+    # coll_parents = parent_lookup(coll_scene)
+
+    # # Get collection references
+    # coll_target = coll_scene.children.get(arm_coll)
+    # # arm_coll = bpy.data.collections[arm_coll]
+    # active_coll = bpy.data.collections[arm_coll]
+
+    # # Get parent of *active_coll*
+    # active_coll_parent = coll_parents.get(active_coll.name)
+    # print(f"active_coll_parent  {active_coll_parent} ")
+    # print(f"active_coll         {active_coll} ")
+
+    # if active_coll_parent:
+    #     # Unlink *active_coll*
+    #     active_coll_parent.children.unlink(active_coll)
+
+    #     # Link *active_coll* to *coll_target*
+    #     coll_target.children.link(active_coll)
 
 
 # # # # ===========================================================

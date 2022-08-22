@@ -23,8 +23,10 @@ PROPS = [
         bpy.props.FloatVectorProperty(
             name="Bounding Box color",
             subtype="COLOR",
-            default=(1.0, 1.0, 1.0, 1.0),
             size=4,
+            min=0.0,
+            max=1.0,
+            default=(1.0, 1.0, 1.0, 1.0),
         ),
     ),
     (
@@ -87,16 +89,22 @@ class ExportData(Operator, ImportHelper):
     def execute(self, context):
 
         good_bb = {}
-        restructured_bb = {}  # to further sort objects by id
 
+        print("\n\n\n==========================")
         # getting colletion with custom props
         for col in bpy.data.collections:
             prop = col.get("class_id")
+            print(col.name)
+            print(prop)
+            print(len(col.all_objects))
 
             # getting colletion if it has custom prop and object(s)
             if prop != None and len(col.all_objects) != 0:
+                print(f"\t{col}")
+
                 for o in col.all_objects:
                     # getting armature with correct bone names
+                    # bones = [o.names for o in o.pose.bones]
                     if o.type == "ARMATURE":
                         if (
                             ("root" in o.pose.bones)
@@ -107,7 +115,7 @@ class ExportData(Operator, ImportHelper):
                         ):
                             # print(f"[+] {o.name} has all bones")
                             good_bb[o] = prop
-                            restructured_bb[prop] = []
+                            print(o)
                         else:
                             print(f"[-] {o.name} has different bone names")
 
@@ -307,7 +315,9 @@ class UiPanel(Panel):
         scn = bpy.context.scene
         layout = self.layout
 
-        col.operator("opr.import_video", text="Import Video")
+        box = layout.box()
+        box.label(text="Import Video")
+        box.operator("opr.import_video", text="Import Video")
 
         # # ===========================================================
 
@@ -323,7 +333,7 @@ class UiPanel(Panel):
         box = layout.box()
         box.label(text="Export Data")
         # self.layout.prop_search(bpy.context.scene,"target",bpy.context.scene,"objects",text="Select Bounding Box")
-        box.operator("wm.textop", text="Class name & id")
+        box.operator("wm.textop", text="Add New Class ID")
 
         col = box.column(align=True)
         row = col.row(align=True)

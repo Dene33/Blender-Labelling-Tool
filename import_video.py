@@ -64,13 +64,13 @@ def camera_set_up(filepath):
     bpy.context.scene.render.resolution_y = vid.size[1]
 
     bl_frame_rates = [
-        23.98,
+        # 23.98,
         24,
         25,
-        29.97,
+        # 29.97,
         30,
         50,
-        59.94,
+        # 59.94,
         60,
         120,
         240,
