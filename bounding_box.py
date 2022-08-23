@@ -71,7 +71,7 @@ def bounding_box_set_up(name, color):
         bpy.ops.object.mode_set(mode="OBJECT")
 
     # get active collection
-    active_collection = bpy.context.view_layer.active_layer_collection.collection
+    target_collection = bpy.context.view_layer.active_layer_collection.collection
 
     name = get_new_name(name)
 
@@ -281,11 +281,6 @@ def bounding_box_set_up(name, color):
 
     # ===========================================================
 
-    # # adding shape keys for plane
-    # plane.shape_key_add(name=class_id)
-
-    # ===========================================================
-
     # creating material
     mat_name = f"{name}_mat"
     material_basic = bpy.data.materials.new(name=mat_name)
@@ -293,7 +288,6 @@ def bounding_box_set_up(name, color):
     plane.active_material = material_basic
     principled_node = material_basic.node_tree.nodes.get("Principled BSDF")
     principled_node.inputs[0].default_value = (color[0], color[1], color[2], 1)
-    # alpha = 0.3
     principled_node.inputs[21].default_value = 0.3
 
     # add Alpha Blend to material
@@ -339,28 +333,26 @@ def bounding_box_set_up(name, color):
 
     # ===========================================================
 
-    # C = bpy.context
+    C = bpy.context
 
-    # # Get all collections of the scene and their parents in a dict
-    # coll_scene = C.scene.collection
-    # coll_parents = parent_lookup(coll_scene)
+    # Get all collections of the scene and their parents in a dict
+    coll_scene = C.scene.collection
+    coll_parents = parent_lookup(coll_scene)
 
-    # # Get collection references
-    # coll_target = coll_scene.children.get(arm_coll)
-    # # arm_coll = bpy.data.collections[arm_coll]
-    # active_coll = bpy.data.collections[arm_coll]
+    # Get collection references
+    coll_target = coll_scene.children.get(arm_coll)
+    # arm_coll = bpy.data.collections[arm_coll]
+    active_coll = bpy.data.collections[arm_coll]
 
-    # # Get parent of *active_coll*
-    # active_coll_parent = coll_parents.get(active_coll.name)
-    # print(f"active_coll_parent  {active_coll_parent} ")
-    # print(f"active_coll         {active_coll} ")
+    # Get parent of *active_coll*
+    active_coll_parent = coll_parents.get(active_coll.name)
 
-    # if active_coll_parent:
-    #     # Unlink *active_coll*
-    #     active_coll_parent.children.unlink(active_coll)
+    if active_coll_parent:
+        # Unlink *active_coll*
+        active_coll_parent.children.unlink(active_coll)
 
-    #     # Link *active_coll* to *coll_target*
-    #     coll_target.children.link(active_coll)
+        # Link *active_coll* to *coll_target*
+        target_collection.children.link(active_coll)
 
 
 # # # # ===========================================================
