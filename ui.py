@@ -190,7 +190,7 @@ class ExportData(Operator):
         if len(good_col) == 0:
             self.report(
                 {"ERROR"},
-                f"No collections with id found, or no armature in that collection(s)",
+                f"No collections with id found, or no armature in that collection",
             )
             del good_col
         # ===========================================================

@@ -341,19 +341,13 @@ def bounding_box_set_up(name, color):
     coll_scene = C.scene.collection
     coll_parents = parent_lookup(coll_scene)
 
-    # Get collection references
-    coll_target = coll_scene.children.get(arm_coll)
-    # arm_coll = bpy.data.collections[arm_coll]
     active_coll = bpy.data.collections[arm_coll]
 
     # Get parent of *active_coll*
     active_coll_parent = coll_parents.get(active_coll.name)
 
     if active_coll_parent:
-        # Unlink *active_coll*
         active_coll_parent.children.unlink(active_coll)
-
-        # Link *active_coll* to *coll_target*
         target_collection.children.link(active_coll)
 
 

@@ -16,7 +16,7 @@ bl_info = {
     "author": "demania",
     "description": "",
     "blender": (2, 80, 0),
-    "version": (0, 0, 8),
+    "version": (0, 0, 9),
     "location": "",
     "warning": "",
     "category": "Generic",
@@ -35,16 +35,9 @@ from .ui import (
     ExportData,
     WM_textOp,
     GU_PT_collection_custom_properties,
-    # CUSTOM_OT_actions,
-    # CUSTOM_UL_items,
-    # CUSTOM_PG_materialCollection,
-    # CUSTOM_PG_Collection,
 )
 
 # ===========================================================
-
-
-from bpy.props import IntProperty, CollectionProperty
 
 
 classes = [
@@ -54,10 +47,6 @@ classes = [
     ExportData,
     WM_textOp,
     GU_PT_collection_custom_properties,
-    # CUSTOM_OT_actions,
-    # CUSTOM_UL_items,
-    # CUSTOM_PG_materialCollection,
-    # CUSTOM_PG_Collection,
 ]
 # ===========================================================
 
@@ -68,13 +57,6 @@ def register():
 
     for c in classes:
         bpy.utils.register_class(c)
-
-    # Custom scene properties
-    # bpy.types.Scene.custom = CollectionProperty(type=CUSTOM_PG_materialCollection)
-    # bpy.types.Scene.custom_2 = CollectionProperty(type=CUSTOM_PG_Collection)
-
-    # bpy.types.Scene.int_index_prop = IntProperty()
-    # bpy.types.Scene.class_name_prop = bpy.props.StringProperty(name="class name test")
 
 
 def unregister():
