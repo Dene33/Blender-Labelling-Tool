@@ -1,8 +1,13 @@
 import bpy
 import os
-from bpy_extras.io_utils import ImportHelper
+from bpy_extras.io_utils import ImportHelper, ExportHelper
 
-from bpy.types import Operator, Panel, PropertyGroup, UIList
+from bpy.types import Operator, Panel
+from bpy.props import (
+    StringProperty,
+    FloatVectorProperty,
+    IntProperty,
+)
 
 # from bpy.props import StringProperty
 
@@ -13,14 +18,14 @@ CLASS_ID = None
 PROPS = [
     (
         "bounding_box",
-        bpy.props.StringProperty(
+        StringProperty(
             name="box name",
             default="bb",
         ),
     ),
     (
         "my_color",
-        bpy.props.FloatVectorProperty(
+        FloatVectorProperty(
             name="Bounding Box color",
             subtype="COLOR",
             size=4,
@@ -31,17 +36,27 @@ PROPS = [
     ),
     (
         "class_name",
-        bpy.props.StringProperty(
+        StringProperty(
             name="class",
             default="class",
         ),
     ),
     (
         "id",
-        bpy.props.IntProperty(
+        IntProperty(
             name="id",
             default=0,
             min=0,
+        ),
+    ),
+    (
+        "path",
+        StringProperty(
+            name="Export",
+            description="Path to Directory",
+            default="",
+            maxlen=1024,
+            subtype="DIR_PATH",
         ),
     ),
 ]
@@ -81,7 +96,62 @@ class AddBoundingBoxOperator(Operator):
 # ===========================================================
 
 
-class ExportData(Operator, ImportHelper):
+# class ExportData(Operator, ImportHelper):
+#     bl_idname = "opr.export_operator"
+#     bl_label = "export data"
+#     bl_options = {"REGISTER", "UNDO"}
+
+#     def execute(self, context):
+
+#         good_bb = {}
+
+#         # getting colletion with custom props
+#         for col in bpy.data.collections:
+#             prop = col.get("class_id")
+
+#             # getting colletion if it has custom prop and object(s)
+#             if prop != None and len(col.all_objects) != 0:
+
+#                 for o in col.all_objects:
+#                     # getting armature with correct bone names
+#                     # bones = [o.names for o in o.pose.bones]
+#                     if o.type == "ARMATURE":
+#                         if (
+#                             ("root" in o.pose.bones)
+#                             and ("top_left" in o.pose.bones)
+#                             and ("bottom_right" in o.pose.bones)
+#                             and ("top_right" in o.pose.bones)
+#                             and ("bottom_left" in o.pose.bones)
+#                         ):
+#                             # print(f"[+] {o.name} has all bones")
+#                             good_bb[o] = prop
+#                             print(o)
+#                         else:
+#                             print(f"[-] {o.name} has different bone names")
+
+#         # ===========================================================
+
+#         file_path = self.filepath
+#         # check if inputted path is folder
+#         print("File name:", file_path)
+#         if os.path.isdir(file_path) == True:
+#             frame_start = bpy.context.scene.frame_start
+#             frame_end = bpy.context.scene.frame_end
+#             for obj, id in good_bb.items():
+#                 export_data.export(
+#                     self,
+#                     obj,
+#                     frame_start,
+#                     frame_end,
+#                     file_path,
+#                     id,
+#                 )
+#         else:
+#             self.report({"ERROR"}, f"Path selected isn't a folder \n {file_path}")
+#         return {"FINISHED"}
+
+
+class ExportData(Operator):
     bl_idname = "opr.export_operator"
     bl_label = "export data"
     bl_options = {"REGISTER", "UNDO"}
@@ -89,18 +159,16 @@ class ExportData(Operator, ImportHelper):
     def execute(self, context):
 
         good_bb = {}
+        good_col = []
 
-        print("\n\n\n==========================")
         # getting colletion with custom props
         for col in bpy.data.collections:
             prop = col.get("class_id")
-            print(col.name)
-            print(prop)
-            print(len(col.all_objects))
 
             # getting colletion if it has custom prop and object(s)
             if prop != None and len(col.all_objects) != 0:
-                print(f"\t{col}")
+
+                good_col.append(col.name)  # for pop up mesage
 
                 for o in col.all_objects:
                     # getting armature with correct bone names
@@ -119,31 +187,25 @@ class ExportData(Operator, ImportHelper):
                         else:
                             print(f"[-] {o.name} has different bone names")
 
-        # # restructure dict to id : [object]
-        # for k, v in good_bb.items():
-        #     for k2, v2 in restructured_bb.items():
-        #         if v == k2:
-        #             restructured_bb[k2].append(k)
-
+        if len(good_col) == 0:
+            self.report(
+                {"ERROR"},
+                f"No collections with id found, or no armature in that collection(s)",
+            )
+            del good_col
         # ===========================================================
 
-        file_path = self.filepath
-        # check if inputted path is folder
-        print("File name:", file_path)
-        if os.path.isdir(file_path) == True:
-            frame_start = bpy.context.scene.frame_start
-            frame_end = bpy.context.scene.frame_end
-            for obj, id in good_bb.items():
-                export_data.export(
-                    self,
-                    obj,
-                    frame_start,
-                    frame_end,
-                    file_path,
-                    id,
-                )
-        else:
-            self.report({"ERROR"}, f"Path selected isn't a folder \n {file_path}")
+        frame_start = bpy.context.scene.frame_start
+        frame_end = bpy.context.scene.frame_end
+        for obj, id in good_bb.items():
+            export_data.export(
+                self,
+                obj,
+                frame_start,
+                frame_end,
+                context.scene.path,
+                id,
+            )
         return {"FINISHED"}
 
 
@@ -155,8 +217,8 @@ class WM_textOp(Operator):
     bl_label = "Class name and ID"
     bl_options = {"REGISTER", "UNDO"}
 
-    class_name: bpy.props.StringProperty(name="Class Name", default="")
-    class_id: bpy.props.IntProperty(name="Class ID", default=0, min=0)
+    class_name: StringProperty(name="Class Name", default="")
+    class_id: IntProperty(name="Class ID", default=0, min=0)
 
     def execute(self, context):
         new_coll = collection_functional.create_collection(self.class_name, True)
@@ -194,114 +256,6 @@ class GU_PT_collection_custom_properties(bpy.types.Panel, PropertyPanel):
 
 # ===========================================================
 
-# class CUSTOM_OT_actions(Operator):
-#     """Move items up and down, add and remove"""
-
-#     bl_idname = "custom.list_action"
-#     bl_label = "List Actions"
-#     bl_description = "Move items up and down, add and remove"
-#     bl_options = {"REGISTER"}
-
-#     action: bpy.props.EnumProperty(
-#         items=(
-#             ("UP", "Up", ""),
-#             ("DOWN", "Down", ""),
-#             ("REMOVE", "Remove", ""),
-#             ("ADD", "Add", ""),
-#         )
-#     )
-
-#     def random_color(self):
-#         from mathutils import Color
-#         from random import random
-
-#         return Color((random(), random(), random()))
-
-#     def invoke(self, context, event):
-#         scn = context.scene
-#         idx = scn.custom_index
-
-#         try:
-#             item = scn.custom[idx]
-#         except IndexError:
-#             pass
-#         else:
-#             if self.action == "DOWN" and idx < len(scn.custom) - 1:
-#                 item_next = scn.custom[idx + 1].name
-#                 scn.custom.move(idx, idx + 1)
-#                 scn.custom_index += 1
-#                 info = f'Item "{item.name}" moved to position {scn.custom_index + 1}'
-#                 self.report({"INFO"}, info)
-
-#             elif self.action == "UP" and idx >= 1:
-#                 item_prev = scn.custom[idx - 1].name
-#                 scn.custom.move(idx, idx - 1)
-#                 scn.custom_index -= 1
-#                 info = f'Item "{item.name}" moved to position {scn.custom_index+1}'
-#                 self.report({"INFO"}, info)
-
-#             elif self.action == "REMOVE":
-#                 item = scn.custom[scn.custom_index]
-#                 mat = item.material
-#                 if mat:
-#                     mat_obj = bpy.data.materials.get(mat.name, None)
-#                     if mat_obj:
-#                         bpy.data.materials.remove(mat_obj, do_unlink=True)
-#                 info = f"Item {item} removed from scene"
-#                 scn.custom.remove(idx)
-#                 if scn.custom_index == 0:
-#                     scn.custom_index = 0
-#                 else:
-#                     scn.custom_index -= 1
-#                 self.report({"INFO"}, info)
-
-#         if self.action == "ADD":
-#             item = scn.custom.add()
-#             item.id = len(scn.custom)
-#             item.material = bpy.data.materials.new(name="Material")
-#             item.name = item.material.name
-#             col = self.random_color()
-#             item.material.diffuse_color = (col.r, col.g, col.b, 1.0)
-#             scn.custom_index = len(scn.custom) - 1
-#             info = f"{item.name} added to list"
-#             self.report({"INFO"}, info)
-#         return {"FINISHED"}
-
-# class CUSTOM_UL_items(UIList):
-#     def draw_item(
-#         self, context, layout, data, item, icon, active_data, active_propname, index
-#     ):
-#         mat = item.material
-#         if self.layout_type in {"DEFAULT", "COMPACT"}:
-#             split = layout.split(factor=0.3)
-#             split.label(text=f"Index: {index}")
-#             # static method UILayout.icon returns the integer value of the icon ID
-#             # "computed" for the given RNA object.
-#             split.prop(mat, "name", text="", emboss=False, icon_value=layout.icon(mat))
-
-#         elif self.layout_type in {"GRID"}:
-#             layout.alignment = "CENTER"
-#             layout.label(text="", icon_value=layout.icon(mat))
-
-#     def invoke(self, context, event):
-#         pass
-
-# ===========================================================
-
-# from bpy.props import PointerProperty
-
-# class CUSTOM_PG_materialCollection(PropertyGroup):
-#     # name: StringProperty() -> Instantiated by default
-#     material: PointerProperty(name="Material", type=bpy.types.Material)
-
-# class CUSTOM_PG_Collection(PropertyGroup):
-#     class_name_prop: bpy.props.StringProperty(name="class", default="class")
-#     id_prop: bpy.props.IntProperty(name="id", default=0, min=0)
-
-# ===========================================================
-
-# bpy.types.Scene.target = bpy.props.PointerProperty(type=bpy.types.Object)
-
 
 class UiPanel(Panel):
     bl_idname = "VIEW3D_PT_ui"
@@ -337,26 +291,5 @@ class UiPanel(Panel):
 
         col = box.column(align=True)
         row = col.row(align=True)
-        row.operator("opr.export_operator", text="Export data")
-        # if context.selected_objects:
-        #     row.operator("opr.export_operator", text="Export data")
-        # else:
-        #     row.enabled = False
-        #     row.operator("opr.export_operator", text="select armature first")
-        # box.separator()
-
-        # # ===========================================================
-
-        # box2 = layout.box()
-        # box2.label(text="Class id")
-
-        # box2.template_list("CUSTOM_UL_items","custom_def_list",scn,"custom",scn,"custom_index",rows=3)
-        # box2.separator()
-
-        # col = box2.column(align=True)
-        # row = col.row(align=False)
-        # row.prop(context.scene, "class_name")
-        # row.prop(context.scene, "id")
-
-        # box2.operator("custom.list_action", icon="ADD", text="").action = "ADD"
-        # box2.operator("custom.list_action", icon="REMOVE", text="").action = "REMOVE"
+        box.prop(context.scene, "path")
+        box.operator("opr.export_operator", text="Export data")

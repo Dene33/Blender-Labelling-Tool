@@ -1,3 +1,4 @@
+import collections
 import bpy
 from math import radians
 from . import collection_functional
@@ -333,6 +334,7 @@ def bounding_box_set_up(name, color):
 
     # ===========================================================
 
+    # moveve bounding_box collection to active collection
     C = bpy.context
 
     # Get all collections of the scene and their parents in a dict
