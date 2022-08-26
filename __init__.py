@@ -33,7 +33,7 @@ from .ui import (
     UiPanel,
     AddBoundingBoxOperator,
     ExportData,
-    WM_textOp,
+    ADD_CLASS,
     GU_PT_collection_custom_properties,
 )
 
@@ -45,7 +45,7 @@ classes = [
     UiPanel,
     AddBoundingBoxOperator,
     ExportData,
-    WM_textOp,
+    ADD_CLASS,
     GU_PT_collection_custom_properties,
 ]
 # ===========================================================

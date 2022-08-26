@@ -24,7 +24,7 @@ PROPS = [
         ),
     ),
     (
-        "my_color",
+        "box_color",
         FloatVectorProperty(
             name="Bounding Box color",
             subtype="COLOR",
@@ -38,13 +38,13 @@ PROPS = [
         "class_name",
         StringProperty(
             name="class",
-            default="class",
+            default="class name",
         ),
     ),
     (
-        "id",
+        "class_id",
         IntProperty(
-            name="id",
+            name="Class ID",
             default=0,
             min=0,
         ),
@@ -55,6 +55,7 @@ PROPS = [
             name="Export",
             description="Path to Directory",
             default="",
+            # default="None",
             maxlen=1024,
             subtype="DIR_PATH",
         ),
@@ -70,9 +71,7 @@ class ImportVideoOperator(Operator, ImportHelper):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        # filename, extension = os.path.splitext(self.filepath)
         import_video.camera_set_up(self.filepath)
-
         return {"FINISHED"}
 
 
@@ -88,67 +87,12 @@ class AddBoundingBoxOperator(Operator):
         bounding_box.bounding_box_set_up(
             context.scene.bounding_box,
             # context.scene.class_id,
-            context.scene.my_color,
+            context.scene.box_color,
         )
         return {"FINISHED"}
 
 
 # ===========================================================
-
-
-# class ExportData(Operator, ImportHelper):
-#     bl_idname = "opr.export_operator"
-#     bl_label = "export data"
-#     bl_options = {"REGISTER", "UNDO"}
-
-#     def execute(self, context):
-
-#         good_bb = {}
-
-#         # getting colletion with custom props
-#         for col in bpy.data.collections:
-#             prop = col.get("class_id")
-
-#             # getting colletion if it has custom prop and object(s)
-#             if prop != None and len(col.all_objects) != 0:
-
-#                 for o in col.all_objects:
-#                     # getting armature with correct bone names
-#                     # bones = [o.names for o in o.pose.bones]
-#                     if o.type == "ARMATURE":
-#                         if (
-#                             ("root" in o.pose.bones)
-#                             and ("top_left" in o.pose.bones)
-#                             and ("bottom_right" in o.pose.bones)
-#                             and ("top_right" in o.pose.bones)
-#                             and ("bottom_left" in o.pose.bones)
-#                         ):
-#                             # print(f"[+] {o.name} has all bones")
-#                             good_bb[o] = prop
-#                             print(o)
-#                         else:
-#                             print(f"[-] {o.name} has different bone names")
-
-#         # ===========================================================
-
-#         file_path = self.filepath
-#         # check if inputted path is folder
-#         print("File name:", file_path)
-#         if os.path.isdir(file_path) == True:
-#             frame_start = bpy.context.scene.frame_start
-#             frame_end = bpy.context.scene.frame_end
-#             for obj, id in good_bb.items():
-#                 export_data.export(
-#                     self,
-#                     obj,
-#                     frame_start,
-#                     frame_end,
-#                     file_path,
-#                     id,
-#                 )
-#         else:
-#             self.report({"ERROR"}, f"Path selected isn't a folder \n {file_path}")
-#         return {"FINISHED"}
 
 
 class ExportData(Operator):
@@ -157,71 +101,70 @@ class ExportData(Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
+        if os.path.isdir(context.scene.path) == True:
+            good_bb = {}
+            good_col = []
 
-        good_bb = {}
-        good_col = []
+            # getting colletion with custom props
+            for col in bpy.data.collections:
+                prop = col.get("class_id")
 
-        # getting colletion with custom props
-        for col in bpy.data.collections:
-            prop = col.get("class_id")
+                # getting colletion if it has custom prop and object(s)
+                if prop != None and len(col.all_objects) != 0:
 
-            # getting colletion if it has custom prop and object(s)
-            if prop != None and len(col.all_objects) != 0:
+                    good_col.append(col.name)  # for pop up mesage
 
-                good_col.append(col.name)  # for pop up mesage
+                    for o in col.all_objects:
+                        # getting armature with correct bone names
+                        if o.type == "ARMATURE":
+                            if (
+                                ("root" in o.pose.bones)
+                                and ("top_left" in o.pose.bones)
+                                and ("bottom_right" in o.pose.bones)
+                                and ("top_right" in o.pose.bones)
+                                and ("bottom_left" in o.pose.bones)
+                            ):
+                                good_bb[o] = prop
+                                # print(o)
+                            else:
+                                print(f"[-] {o.name} has different bone names")
 
-                for o in col.all_objects:
-                    # getting armature with correct bone names
-                    # bones = [o.names for o in o.pose.bones]
-                    if o.type == "ARMATURE":
-                        if (
-                            ("root" in o.pose.bones)
-                            and ("top_left" in o.pose.bones)
-                            and ("bottom_right" in o.pose.bones)
-                            and ("top_right" in o.pose.bones)
-                            and ("bottom_left" in o.pose.bones)
-                        ):
-                            # print(f"[+] {o.name} has all bones")
-                            good_bb[o] = prop
-                            print(o)
-                        else:
-                            print(f"[-] {o.name} has different bone names")
+            if len(good_col) == 0:
+                self.report(
+                    {"ERROR"},
+                    f"No collections with id found, or no armature in that collection",
+                )
+                del good_col
+            # ===========================================================
 
-        if len(good_col) == 0:
-            self.report(
-                {"ERROR"},
-                f"No collections with id found, or no armature in that collection",
-            )
-            del good_col
-        # ===========================================================
-
-        frame_start = bpy.context.scene.frame_start
-        frame_end = bpy.context.scene.frame_end
-        for obj, id in good_bb.items():
-            export_data.export(
-                self,
-                obj,
-                frame_start,
-                frame_end,
-                context.scene.path,
-                id,
-            )
+            frame_start = bpy.context.scene.frame_start
+            frame_end = bpy.context.scene.frame_end
+            for obj, id in good_bb.items():
+                export_data.export(
+                    self,
+                    obj,
+                    frame_start,
+                    frame_end,
+                    context.scene.path,
+                    id,
+                )
+        else:
+            self.report({"ERROR"}, f"Path selected {context.scene.path} isn't a folder")
         return {"FINISHED"}
 
 
 # ===========================================================
 
 
-class WM_textOp(Operator):
+class ADD_CLASS(Operator):
     bl_idname = "wm.textop"
     bl_label = "Class name and ID"
     bl_options = {"REGISTER", "UNDO"}
 
-    class_name: StringProperty(name="Class Name", default="")
-    class_id: IntProperty(name="Class ID", default=0, min=0)
-
     def execute(self, context):
-        new_coll = collection_functional.create_collection(self.class_name, True)
+        new_coll = collection_functional.create_collection(
+            context.scene.class_name, True
+        )
         bpy.data.collections[new_coll].color_tag = "COLOR_05"
 
         # make colletion active
@@ -229,14 +172,11 @@ class WM_textOp(Operator):
         for collection in collections:
             if collection.name == new_coll:
                 bpy.context.view_layer.active_layer_collection = collection
-                bpy.data.collections[new_coll]["class_id"] = self.class_id
-                global CLASS_ID
-                CLASS_ID = self.class_id
+                bpy.data.collections[new_coll]["class_id"] = context.scene.class_id
+                # global CLASS_ID
+                # CLASS_ID = context.scene.class_id
 
         return {"FINISHED"}
-
-    def invoke(self, context, event):
-        return context.window_manager.invoke_props_dialog(self)
 
 
 # ===========================================================
@@ -265,8 +205,6 @@ class UiPanel(Panel):
     bl_region_type = "UI"
 
     def draw(self, context):
-        col = self.layout.column()
-        scn = bpy.context.scene
         layout = self.layout
 
         box = layout.box()
@@ -278,8 +216,17 @@ class UiPanel(Panel):
         box = layout.box()
         box.label(text="Bounding Box")
         box.prop(context.scene, "bounding_box")
-        box.prop(context.scene, "my_color")
+        box.prop(context.scene, "box_color")
         box.operator("opr.bounding_box_operator", text="Add Bounding Box")
+        box.separator()
+
+        # # ===========================================================
+
+        box = layout.box()
+        box.label(text="Class IDs")
+        box.prop(context.scene, "class_name")
+        box.prop(context.scene, "class_id")
+        box.operator("wm.textop", text="Add New Class ID")
         box.separator()
 
         # # ===========================================================
@@ -287,9 +234,6 @@ class UiPanel(Panel):
         box = layout.box()
         box.label(text="Export Data")
         # self.layout.prop_search(bpy.context.scene,"target",bpy.context.scene,"objects",text="Select Bounding Box")
-        box.operator("wm.textop", text="Add New Class ID")
 
-        col = box.column(align=True)
-        row = col.row(align=True)
         box.prop(context.scene, "path")
         box.operator("opr.export_operator", text="Export data")
