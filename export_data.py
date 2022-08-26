@@ -25,15 +25,12 @@ def export(self, arm, frame_start, frame_end, txt_path, class_id):
     try:
         cam = bpy.data.objects["Camera"]
 
-        # arm = bpy.data.objects[arm]
-        print(arm)
         # ===========================================================
 
         bones_info = {}
         # bones_info : [
         # 		# [frame, head, tail]
         # 		[1, head, tail],
-        # 		[2, head, tail],
         #  		... ]
 
         for bone in arm.pose.bones:
@@ -118,16 +115,6 @@ def export(self, arm, frame_start, frame_end, txt_path, class_id):
 
         # # ===========================================================
 
-        # print("\n\n\n")
-        # for k, v in yolo_co.items():
-        #     print()
-        #     print(k)
-        #     print(v)
-        #     # print(type(v))
-        #     # print(len(v))
-
-        # # ===========================================================
-
         # # YOLO format is : object-class x y width height
 
         # # Serializing json
@@ -138,5 +125,4 @@ def export(self, arm, frame_start, frame_end, txt_path, class_id):
         #     outfile.write(json_object)
 
     except:
-        print("no cam")
         self.report({"ERROR"}, f"No camera in 3D scene")

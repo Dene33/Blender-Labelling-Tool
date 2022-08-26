@@ -1,4 +1,4 @@
-import collections
+# import collections
 import bpy
 from math import radians
 from . import collection_functional
@@ -66,13 +66,38 @@ def get_new_name(name_to_check):
 # ===========================================================
 
 
-def bounding_box_set_up(name, color):
+def bounding_box_set_up(self, name, color):
 
     if bpy.context.mode != "OBJECT":
         bpy.ops.object.mode_set(mode="OBJECT")
 
     # get active collection
     target_collection = bpy.context.view_layer.active_layer_collection.collection
+
+    if target_collection.get("class_id") == None:
+        # ('DEBUG', 'INFO', 'OPERATOR', 'PROPERTY', 'WARNING', 'ERROR', 'ERROR_INVALID_INPUT', 'ERROR_INVALID_CONTEXT', 'ERROR_OUT_OF_MEMORY')
+        self.report(
+            {"ERROR"},
+            f"Collection '{target_collection.name}' doesn't have custom prop",
+        )
+
+        # getting colletion with custom props
+        colls = []
+        for col in bpy.data.collections:
+            if col.get("class_id") != None:
+                colls.append(col)
+
+        for i in colls:
+            print(i)
+
+        print()
+        print(f"len(colls) {len(colls)}")
+
+        # if only one collections has custom prop assign bb to it
+        if len(colls) == 1:
+            target_collection = colls[0]
+
+    # ===========================================================
 
     name = get_new_name(name)
 

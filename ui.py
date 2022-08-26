@@ -85,6 +85,7 @@ class AddBoundingBoxOperator(Operator):
 
     def execute(self, context):
         bounding_box.bounding_box_set_up(
+            self,
             context.scene.bounding_box,
             # context.scene.class_id,
             context.scene.box_color,
@@ -162,19 +163,9 @@ class ADD_CLASS(Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        new_coll = collection_functional.create_collection(
-            context.scene.class_name, True
+        collection_functional.create_blue_collection(
+            context.scene.class_name, context.scene.class_id
         )
-        bpy.data.collections[new_coll].color_tag = "COLOR_05"
-
-        # make colletion active
-        collections = bpy.context.view_layer.layer_collection.children
-        for collection in collections:
-            if collection.name == new_coll:
-                bpy.context.view_layer.active_layer_collection = collection
-                bpy.data.collections[new_coll]["class_id"] = context.scene.class_id
-                # global CLASS_ID
-                # CLASS_ID = context.scene.class_id
 
         return {"FINISHED"}
 

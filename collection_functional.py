@@ -36,3 +36,18 @@ def link_to_collection(cam_coll_name, obj):
         coll.objects.unlink(obj)
     coll_target = bpy.context.scene.collection.children.get(cam_coll_name)
     coll_target.objects.link(obj)
+
+
+# ===============================================================
+def create_blue_collection(class_name, id):
+    new_coll = create_collection(class_name, True)
+    bpy.data.collections[new_coll].color_tag = "COLOR_05"
+
+    # make colletion active
+    collections = bpy.context.view_layer.layer_collection.children
+    for collection in collections:
+        if collection.name == new_coll:
+            bpy.context.view_layer.active_layer_collection = collection
+            bpy.data.collections[new_coll]["class_id"] = id
+            # global CLASS_ID
+            # CLASS_ID = context.scene.class_id
