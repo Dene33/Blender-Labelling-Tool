@@ -46,7 +46,7 @@ def camera_set_up(filepath):
     # ===============================================================
 
     # unlink camera from collection and link to Camera collection created
-    collection_functional.link_to_collection(cam_coll_name, my_cam)
+    collection_functional.link_object_to_collection(cam_coll_name, my_cam)
 
     # ===============================================================
 

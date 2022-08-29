@@ -74,29 +74,6 @@ def bounding_box_set_up(self, name, color):
     # get active collection
     target_collection = bpy.context.view_layer.active_layer_collection.collection
 
-    if target_collection.get("class_id") == None:
-        # ('DEBUG', 'INFO', 'OPERATOR', 'PROPERTY', 'WARNING', 'ERROR', 'ERROR_INVALID_INPUT', 'ERROR_INVALID_CONTEXT', 'ERROR_OUT_OF_MEMORY')
-        self.report(
-            {"ERROR"},
-            f"Collection '{target_collection.name}' doesn't have custom prop",
-        )
-
-        # getting colletion with custom props
-        colls = []
-        for col in bpy.data.collections:
-            if col.get("class_id") != None:
-                colls.append(col)
-
-        for i in colls:
-            print(i)
-
-        print()
-        print(f"len(colls) {len(colls)}")
-
-        # if only one collections has custom prop assign bb to it
-        if len(colls) == 1:
-            target_collection = colls[0]
-
     # ===========================================================
 
     name = get_new_name(name)
@@ -344,10 +321,10 @@ def bounding_box_set_up(self, name, color):
 
     # ===========================================================
     # link objects to collection
-    collection_functional.link_to_collection(arm_coll, arm)
-    collection_functional.link_to_collection(bone_shape_coll, plane_custom_obj)
-    collection_functional.link_to_collection(bone_shape_coll, circle_custom_obj)
-    collection_functional.link_to_collection(arm_coll, plane)
+    collection_functional.link_object_to_collection(arm_coll, arm)
+    collection_functional.link_object_to_collection(bone_shape_coll, plane_custom_obj)
+    collection_functional.link_object_to_collection(bone_shape_coll, circle_custom_obj)
+    collection_functional.link_object_to_collection(arm_coll, plane)
 
     plane_custom_obj.hide_set(True)
     circle_custom_obj.hide_set(True)
@@ -374,6 +351,66 @@ def bounding_box_set_up(self, name, color):
     if active_coll_parent:
         active_coll_parent.children.unlink(active_coll)
         target_collection.children.link(active_coll)
+
+    # ===========================================================
+
+    print(f"target_collection {target_collection.name}")
+
+    good_col = []
+    for col in bpy.data.collections:
+        if col.get("class_id") != None:
+            good_col.append(col)
+
+    print(good_col)
+
+    if target_collection.get("class_id") == None:
+        if len(good_col) != 0:
+            # ('DEBUG', 'INFO', 'OPERATOR', 'PROPERTY', 'WARNING', 'ERROR', 'ERROR_INVALID_INPUT', 'ERROR_INVALID_CONTEXT', 'ERROR_OUT_OF_MEMORY')
+            self.report(
+                {"ERROR"},
+                f"'{target_collection.name}' doesn't have custom prop, select blue collection",
+            )
+        else:
+            self.report(
+                {"ERROR"},
+                f"Create collection with 'Add New Class ID' first and place collection '{arm_coll}' there",
+            )
+
+    # # Get all collections of the scene and their parents in a dict
+    # coll_scene = bpy.context.scene.collection
+    # coll_parents = parent_lookup(coll_scene)
+    # # print(f"coll_scene   {coll_scene} {type(coll_scene)} ")
+    # print(f"coll_parents {coll_parents}   {type(coll_parents)} ")
+    # for k, v in coll_parents.items():
+    #     print()
+    #     print(f"\t {k}")
+    #     print(f"\t {v.name}")
+
+    #     # getting colletion with custom props
+    #     colls = []
+    #     for col in bpy.data.collections:
+    #         if col.get("class_id") != None:
+    #             colls.append(col)
+
+    #     for i in colls:
+    #         print(i)
+
+    #     print()
+    #     print(f"len(colls) {len(colls)}")
+
+    #     # if only one collections has custom prop assign bb to it
+    #     if len(colls) == 1:
+    #         target_collection = colls[0]
+
+    #     # Get all collections of the scene and their parents in a dict
+    #     coll_scene = bpy.context.scene.collection
+    #     coll_parents = parent_lookup(coll_scene)
+    #     print(f"coll_scene   {coll_scene} {type(coll_scene)} ")
+    #     print(f"coll_parents {coll_parents} {type(coll_parents)} ")
+    #     for k, v in coll_parents.items():
+    #         print()
+    #         print(f"\t k {k} {type(k)} ")
+    #         print(f"\t v {v} {type(v)} ")
 
 
 # # # # ===========================================================

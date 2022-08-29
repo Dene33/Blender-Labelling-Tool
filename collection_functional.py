@@ -31,7 +31,7 @@ def create_collection(coll_name, create_new=False):
 # ===============================================================
 
 
-def link_to_collection(cam_coll_name, obj):
+def link_object_to_collection(cam_coll_name, obj):
     for coll in obj.users_collection:
         coll.objects.unlink(obj)
     coll_target = bpy.context.scene.collection.children.get(cam_coll_name)
