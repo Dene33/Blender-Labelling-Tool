@@ -126,7 +126,6 @@ class ExportData(Operator):
                                 and ("bottom_left" in o.pose.bones)
                             ):
                                 good_bb[o] = prop
-                                # print(o)
                             else:
                                 print(f"[-] {o.name} has different bone names")
 
@@ -166,7 +165,6 @@ class ADD_CLASS(Operator):
         collection_functional.create_blue_collection(
             context.scene.class_name, context.scene.class_id
         )
-
         return {"FINISHED"}
 
 

@@ -354,16 +354,13 @@ def bounding_box_set_up(self, name, color):
 
     # ===========================================================
 
-    print(f"target_collection {target_collection.name}")
-
     good_col = []
     for col in bpy.data.collections:
         if col.get("class_id") != None:
             good_col.append(col)
 
-    print(good_col)
-
     if target_collection.get("class_id") == None:
+        # if there is collection with custom prop, but is not selected
         if len(good_col) != 0:
             # ('DEBUG', 'INFO', 'OPERATOR', 'PROPERTY', 'WARNING', 'ERROR', 'ERROR_INVALID_INPUT', 'ERROR_INVALID_CONTEXT', 'ERROR_OUT_OF_MEMORY')
             self.report(
@@ -375,6 +372,7 @@ def bounding_box_set_up(self, name, color):
                 {"ERROR"},
                 f"Create collection with 'Add New Class ID' first and place collection '{arm_coll}' there",
             )
+    del good_col
 
     # # Get all collections of the scene and their parents in a dict
     # coll_scene = bpy.context.scene.collection
