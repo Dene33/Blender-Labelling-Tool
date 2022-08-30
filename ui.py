@@ -7,6 +7,7 @@ from bpy.props import (
     StringProperty,
     FloatVectorProperty,
     IntProperty,
+    BoolProperty,
 )
 
 # from bpy.props import StringProperty
@@ -16,6 +17,18 @@ from . import import_video, bounding_box, export_data, collection_functional
 CLASS_ID = None
 
 PROPS = [
+    (
+        "YOLO",
+        BoolProperty(name="YOLO", default=True),
+    ),
+    (
+        "COCO",
+        BoolProperty(name="COCO", default=False),
+    ),
+    (
+        "PASCAL_VOC",
+        BoolProperty(name="PASCAL_VOC", default=False),
+    ),
     (
         "bounding_box",
         StringProperty(
@@ -102,6 +115,11 @@ class ExportData(Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
+
+        YOLO = context.scene.YOLO
+        COCO = context.scene.COCO
+        PASCAL_VOC = context.scene.PASCAL_VOC
+
         if os.path.isdir(context.scene.path) == True:
             good_bb = {}
             good_col = []
@@ -147,6 +165,9 @@ class ExportData(Operator):
                     frame_end,
                     context.scene.path,
                     id,
+                    YOLO,
+                    COCO,
+                    PASCAL_VOC,
                 )
         else:
             self.report({"ERROR"}, f"Path selected {context.scene.path} isn't a folder")
@@ -184,6 +205,12 @@ class GU_PT_collection_custom_properties(bpy.types.Panel, PropertyPanel):
 
 
 # ===========================================================
+# enum_items = (
+#     ("YOLO", "YOLO", ""),
+#     ("COCO", "COCO", ""),
+#     ("PASCAL_VOC", "PASCAL_VOC", ""),
+# )
+# bpy.types.Scene.obj_type = bpy.props.EnumProperty(items=enum_items)
 
 
 class UiPanel(Panel):
@@ -195,6 +222,8 @@ class UiPanel(Panel):
 
     def draw(self, context):
         layout = self.layout
+
+        # # ===========================================================
 
         box = layout.box()
         box.label(text="Import Video")
@@ -225,4 +254,8 @@ class UiPanel(Panel):
         # self.layout.prop_search(bpy.context.scene,"target",bpy.context.scene,"objects",text="Select Bounding Box")
 
         box.prop(context.scene, "path")
+        box.prop(context.scene, "YOLO")
+        box.prop(context.scene, "COCO")
+        box.prop(context.scene, "PASCAL_VOC")
+
         box.operator("opr.export_operator", text="Export data")
