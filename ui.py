@@ -120,7 +120,11 @@ class ExportData(Operator):
         COCO = context.scene.COCO
         PASCAL_VOC = context.scene.PASCAL_VOC
 
-        if os.path.isdir(context.scene.path) == True:
+        export_path = bpy.path.abspath(context.scene.path)
+        print(f"context.scene.path      {context.scene.path} ")
+        print(f"bpy.path.abspath        {bpy.path.abspath(context.scene.path)} ")
+        print(f"export_path             {export_path} ")
+        if os.path.isdir(export_path) == True:
             good_bb = {}
             good_col = []
 
@@ -163,14 +167,14 @@ class ExportData(Operator):
                     obj,
                     frame_start,
                     frame_end,
-                    context.scene.path,
+                    export_path,
                     id,
                     YOLO,
                     COCO,
                     PASCAL_VOC,
                 )
         else:
-            self.report({"ERROR"}, f"Path selected {context.scene.path} isn't a folder")
+            self.report({"ERROR"}, f"Path selected {export_path} isn't a folder")
         return {"FINISHED"}
 
 

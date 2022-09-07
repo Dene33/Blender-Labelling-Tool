@@ -73,11 +73,7 @@ def bounding_box_set_up(self, name, color):
 
     # get active collection
     target_collection = bpy.context.view_layer.active_layer_collection.collection
-    print(target_collection.name)
-    print(target_collection.get("class_id"))
     if target_collection.get("class_id") != None:
-        print("ino")
-
         name = get_new_name(name)
 
         # create collections
