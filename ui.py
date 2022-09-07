@@ -259,6 +259,7 @@ class UiPanel(Panel):
 
         box.prop(context.scene, "path")
         box.prop(context.scene, "YOLO")
+        box.enabled = False
         box.prop(context.scene, "COCO")
         box.prop(context.scene, "PASCAL_VOC")
 

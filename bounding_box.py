@@ -423,12 +423,13 @@ def bounding_box_set_up(self, name, color):
                 # ('DEBUG', 'INFO', 'OPERATOR', 'PROPERTY', 'WARNING', 'ERROR', 'ERROR_INVALID_INPUT', 'ERROR_INVALID_CONTEXT', 'ERROR_OUT_OF_MEMORY')
                 self.report(
                     {"ERROR"},
-                    f"'{target_collection.name}' doesn't have custom prop, select blue collection",
+                    f"Incorrect collection selected! Please, select a collection with 'custom_id' custom property (usually marked with blue color).",
+                    # f"'{target_collection.name}' doesn't have custom prop, select blue collection",
                 )
             else:
                 self.report(
                     {"ERROR"},
-                    f"Create collection with 'Add New Class ID' first",
+                    f"Incorrect collection selected! Please create a Class collection, use 'Add New Class ID' for that.",
                 )
         del good_col
 
