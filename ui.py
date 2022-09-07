@@ -253,14 +253,30 @@ class UiPanel(Panel):
 
         # # ===========================================================
 
+        # self.layout.prop_search(bpy.context.scene,"target",bpy.context.scene,"objects",text="Select Bounding Box")
         box = layout.box()
         box.label(text="Export Data")
-        # self.layout.prop_search(bpy.context.scene,"target",bpy.context.scene,"objects",text="Select Bounding Box")
-
+        print(box, type(box))
         box.prop(context.scene, "path")
-        box.prop(context.scene, "YOLO")
-        box.enabled = False
-        box.prop(context.scene, "COCO")
-        box.prop(context.scene, "PASCAL_VOC")
-
         box.operator("opr.export_operator", text="Export data")
+
+        col = layout.column()
+        col_yolo = layout.column()
+        col_coco = layout.column()
+        col_pascal = layout.column()
+
+        col_yolo.prop(context.scene, "YOLO")
+        col_coco.prop(context.scene, "COCO")
+        col_pascal.prop(context.scene, "PASCAL_VOC")
+
+        col_coco.enabled = False
+        col_pascal.enabled = False
+
+        # row = self.layout.row()
+        # box = layout.box()
+        # box.label(text="testing unchecked")
+
+        # box.enabled = True
+        # box.prop(context.scene, "YOLO")
+        # box.prop(context.scene, "COCO")
+        # context.scene.COCO = False
