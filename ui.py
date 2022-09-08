@@ -121,9 +121,10 @@ class ExportData(Operator):
         PASCAL_VOC = context.scene.PASCAL_VOC
 
         export_path = bpy.path.abspath(context.scene.path)
-        print(f"context.scene.path      {context.scene.path} ")
-        print(f"bpy.path.abspath        {bpy.path.abspath(context.scene.path)} ")
-        print(f"export_path             {export_path} ")
+        # print(f"context.scene.path      {context.scene.path} ")
+        # print(f"bpy.path.abspath        {bpy.path.abspath(context.scene.path)} ")
+        # print(f"export_path             {export_path} ")
+
         if os.path.isdir(export_path) == True:
             good_bb = {}
             good_col = []
@@ -134,9 +135,7 @@ class ExportData(Operator):
 
                 # getting colletion if it has custom prop and object(s)
                 if prop != None and len(col.all_objects) != 0:
-
-                    good_col.append(col.name)  # for pop up mesage
-
+                    good_col.append(col.name)  # for pop up mesages
                     for o in col.all_objects:
                         # getting armature with correct bone names
                         if o.type == "ARMATURE":
@@ -157,6 +156,7 @@ class ExportData(Operator):
                     f"No collections with id found, or no armature in that collection",
                 )
                 del good_col
+
             # ===========================================================
 
             frame_start = bpy.context.scene.frame_start
@@ -209,12 +209,6 @@ class GU_PT_collection_custom_properties(bpy.types.Panel, PropertyPanel):
 
 
 # ===========================================================
-# enum_items = (
-#     ("YOLO", "YOLO", ""),
-#     ("COCO", "COCO", ""),
-#     ("PASCAL_VOC", "PASCAL_VOC", ""),
-# )
-# bpy.types.Scene.obj_type = bpy.props.EnumProperty(items=enum_items)
 
 
 class UiPanel(Panel):
@@ -256,7 +250,6 @@ class UiPanel(Panel):
         # self.layout.prop_search(bpy.context.scene,"target",bpy.context.scene,"objects",text="Select Bounding Box")
         box = layout.box()
         box.label(text="Export Data")
-        print(box, type(box))
         box.prop(context.scene, "path")
         box.operator("opr.export_operator", text="Export data")
 
