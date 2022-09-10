@@ -22,6 +22,12 @@ For now it's possible to annotate bounding boxes on videos and export them in YO
 
 6. Export
 
+
+
+https://user-images.githubusercontent.com/27821127/189505381-7c17492a-5717-4c2a-b58c-d8329b76a6f4.mp4
+
+
+
 ## Future plans
 
 1. Short-term goals
