@@ -8,6 +8,17 @@ It's a anotation tool made on top of Blender (3+).
 
 For now it's possible to annotate bounding boxes on videos and export them in YOLO format.
 
+## How to install
+
+You can install it as ordinary Blender add-on:
+
+1. On GitHub: `Code` > `Download ZIP`
+2. In Blender: `Edit` > `Preferences...` > `Add-ons` > `Install...`
+3. Select downloaded .zip archive
+4. Enable the installed add-on
+
+More info in [official documentation](https://docs.blender.org/manual/en/latest/editors/preferences/addons.html#installing-add-ons)
+
 ## How to use
 
 1. Import a video
