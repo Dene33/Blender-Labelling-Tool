@@ -1,5 +1,7 @@
 # Blender Labelling Tool
 
+![preview](https://user-images.githubusercontent.com/27821127/189505540-de717973-7cd9-493b-8f06-2387872501d1.gif)
+
 ## What's it?
 
 It's a anotation tool made on top of Blender (3+).
