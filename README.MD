@@ -4,7 +4,7 @@
 
 ## What's it?
 
-It’s an annotation tool made on top of Blender (3+).
+It’s an annotation tool made on top of Blender (3+). It is completely free and open source.
 
 ## What can it do?
 
