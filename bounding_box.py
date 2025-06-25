@@ -183,11 +183,23 @@ def bounding_box_set_up(self, name, color):
 
         for bone, param in bones.items():
             context_bone = bpy.context.object.data.bones[bone]
-            context_bone.layers[param[3]] = True
-            # disable all the other layers but layer[0]
-            for cnt in range(0, 32):
-                if cnt != param[3]:
-                    context_bone.layers[cnt] = False
+            if hasattr(context_bone, "layers"):
+                context_bone.layers[param[3]] = True
+                # disable all the other layers but layer[0]
+                for cnt in range(0, 32):
+                    if cnt != param[3]:
+                        context_bone.layers[cnt] = False
+            else:  # Blender 4 removed bone layers
+                arm_data = bpy.context.object.data
+                for bc in arm_data.collections_all:
+                    try:
+                        bc.unassign(context_bone)
+                    except Exception:
+                        pass
+                coll_name = f"Layer {param[3]}"
+                if coll_name not in arm_data.collections:
+                    arm_data.collections.new(coll_name)
+                arm_data.collections[coll_name].assign(context_bone)
 
         # ===========================================================
 

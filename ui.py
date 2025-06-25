@@ -195,7 +195,15 @@ class ADD_CLASS(Operator):
 
 # ===========================================================
 
-from rna_prop_ui import PropertyPanel
+try:
+    from rna_prop_ui import PropertyPanel
+except Exception:  # Blender 4 removed rna_prop_ui module
+    try:
+        from bpy.types import PropertyPanel  # fallback for Blender 4+
+    except Exception:
+        class PropertyPanel:
+            """Fallback empty PropertyPanel for compatibility."""
+            pass
 
 # custom panel to colletions
 class GU_PT_collection_custom_properties(bpy.types.Panel, PropertyPanel):
