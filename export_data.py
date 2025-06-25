@@ -45,9 +45,11 @@ def export(
     frame_end,
     txt_path,
     class_id,
+    class_name,
     YOLO,
     COCO,
     PASCAL_VOC,
+    PIXEL_FRAME,
 ):
 
     try:
@@ -56,7 +58,7 @@ def export(
         # ===========================================================
         # create folders for export types
 
-        YOLO_folder_path, COCO_folder_path, PASCAL_VOC_folder_path = None, None, None
+        YOLO_folder_path, COCO_folder_path, PASCAL_VOC_folder_path, PIXEL_FRAME_folder_path = None, None, None, None
 
         if YOLO == True:
             YOLO_folder_path = create_folder(txt_path, "YOLO")
@@ -64,6 +66,8 @@ def export(
             COCO_folder_path = create_folder(txt_path, "COCO")
         if PASCAL_VOC == True:
             PASCAL_VOC_folder_path = create_folder(txt_path, "PASCAL_VOC")
+        if PIXEL_FRAME == True:
+            PIXEL_FRAME_folder_path = create_folder(txt_path, "PIXEL_FRAME")
 
         # ===========================================================
 
@@ -86,6 +90,7 @@ def export(
         )
 
         yolo_co = {}
+        pixel_frames = []
         for frame in range(frame_start, frame_end + 1):
             bpy.context.scene.frame_set(frame)
 
@@ -151,6 +156,19 @@ def export(
                 yolo_coords[3],
             ]
 
+            pixel_frames.append(
+                {
+                    "frame": frame,
+                    "label": class_name,
+                    "bbox_modal": [
+                        bones_coords["top_left"][0],
+                        bones_coords["top_left"][1],
+                        bones_coords["bottom_right"][0],
+                        bones_coords["bottom_right"][1],
+                    ],
+                }
+            )
+
             # ===========================================================
             # exporting data to txt files
 
@@ -175,16 +193,11 @@ def export(
                 content = f"{class_id} {bones_coords['top_left'][1]},{bones_coords['bottom_right'][0]},{bones_coords['bottom_right'][1]}"
                 write_txt(file_name_PASCAL_VOC, content)
 
-        # # ===========================================================
+        if PIXEL_FRAME:
+            json_path = f"{PIXEL_FRAME_folder_path}/{arm.name}.json"
+            with open(json_path, "w") as jf:
+                json.dump(pixel_frames, jf)
 
-        # # YOLO format is : object-class x y width height
-
-        # # Serializing json
-        # json_object = json.dumps(yolo_co, indent=4)
-
-        # # Writing to sample.json
-        # with open("C:\\Users\\Dime\\Desktop\\txt\\sample.json", "w") as outfile:
-        #     outfile.write(json_object)
 
     except:
         self.report({"ERROR"}, f"No camera in 3D scene")

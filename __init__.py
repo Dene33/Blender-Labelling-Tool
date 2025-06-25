@@ -16,7 +16,7 @@ bl_info = {
     "author": "demania",
     "description": "",
     "blender": (3, 0, 0),
-    "version": (0, 0, 15),
+    "version": (0, 0, 16),
     "location": "",
     "warning": "",
     "category": "Generic",
