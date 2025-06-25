@@ -231,11 +231,16 @@ def bounding_box_set_up(self, name, color):
 
         # create new bone group or collection depending on Blender version
         bone_group_name = "Custom Bone Group"
-        if hasattr(arm.pose, "bone_groups"):
-            bone_group = arm.pose.bone_groups
+        bone_groups_attr = getattr(arm.pose, "bone_groups", None)
+        if bone_groups_attr is not None:
+            bone_group = bone_groups_attr
             bone_group.new(name=bone_group_name)
             bone_group.active.color_set = "CUSTOM"
-            bone_group.active.colors.normal = (color[0], color[1], color[2])
+            bone_group.active.colors.normal = (
+                color[0],
+                color[1],
+                color[2],
+            )
             bone_group_ref = bone_group.get(bone_group_name)
         else:  # Blender 4 removed bone groups in favor of bone collections
             arm_data = arm.data
