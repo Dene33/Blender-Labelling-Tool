@@ -30,6 +30,10 @@ PROPS = [
         BoolProperty(name="PASCAL_VOC", default=False),
     ),
     (
+        "PIXEL_FRAME",
+        BoolProperty(name="Pixel frame", default=False),
+    ),
+    (
         "bounding_box",
         StringProperty(
             name="box name",
@@ -119,6 +123,7 @@ class ExportData(Operator):
         YOLO = context.scene.YOLO
         COCO = context.scene.COCO
         PASCAL_VOC = context.scene.PASCAL_VOC
+        PIXEL_FRAME = context.scene.PIXEL_FRAME
 
         export_path = bpy.path.abspath(context.scene.path)
         # print(f"context.scene.path      {context.scene.path} ")
@@ -146,7 +151,7 @@ class ExportData(Operator):
                                 and ("top_right" in o.pose.bones)
                                 and ("bottom_left" in o.pose.bones)
                             ):
-                                good_bb[o] = prop
+                                good_bb[o] = (prop, col.name)
                             else:
                                 print(f"[-] {o.name} has different bone names")
 
@@ -161,7 +166,7 @@ class ExportData(Operator):
 
             frame_start = bpy.context.scene.frame_start
             frame_end = bpy.context.scene.frame_end
-            for obj, id in good_bb.items():
+            for obj, (id, col_name) in good_bb.items():
                 export_data.export(
                     self,
                     obj,
@@ -169,9 +174,11 @@ class ExportData(Operator):
                     frame_end,
                     export_path,
                     id,
+                    col_name,
                     YOLO,
                     COCO,
                     PASCAL_VOC,
+                    PIXEL_FRAME,
                 )
         else:
             self.report({"ERROR"}, f"Path selected {export_path} isn't a folder")
@@ -195,7 +202,15 @@ class ADD_CLASS(Operator):
 
 # ===========================================================
 
-from rna_prop_ui import PropertyPanel
+try:
+    from rna_prop_ui import PropertyPanel
+except Exception:  # Blender 4 removed rna_prop_ui module
+    try:
+        from bpy.types import PropertyPanel  # fallback for Blender 4+
+    except Exception:
+        class PropertyPanel:
+            """Fallback empty PropertyPanel for compatibility."""
+            pass
 
 # custom panel to colletions
 class GU_PT_collection_custom_properties(bpy.types.Panel, PropertyPanel):
@@ -257,13 +272,16 @@ class UiPanel(Panel):
         col_yolo = layout.column()
         col_coco = layout.column()
         col_pascal = layout.column()
+        col_pixel = layout.column()
 
         col_yolo.prop(context.scene, "YOLO")
         col_coco.prop(context.scene, "COCO")
         col_pascal.prop(context.scene, "PASCAL_VOC")
+        col_pixel.prop(context.scene, "PIXEL_FRAME")
 
         col_coco.enabled = False
         col_pascal.enabled = False
+        col_pixel.enabled = True
 
         # row = self.layout.row()
         # box = layout.box()

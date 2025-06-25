@@ -9,6 +9,7 @@ It’s an annotation tool made on top of Blender (3+). It is completely free and
 ## What can it do?
 
 For now, it's possible to annotate bounding boxes on videos and export them in YOLO format.
+The add-on also supports COCO, Pascal VOC and a Pixel frame JSON format.
 
 ## How to install
 

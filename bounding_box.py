@@ -183,11 +183,23 @@ def bounding_box_set_up(self, name, color):
 
         for bone, param in bones.items():
             context_bone = bpy.context.object.data.bones[bone]
-            context_bone.layers[param[3]] = True
-            # disable all the other layers but layer[0]
-            for cnt in range(0, 32):
-                if cnt != param[3]:
-                    context_bone.layers[cnt] = False
+            if hasattr(context_bone, "layers"):
+                context_bone.layers[param[3]] = True
+                # disable all the other layers but layer[0]
+                for cnt in range(0, 32):
+                    if cnt != param[3]:
+                        context_bone.layers[cnt] = False
+            else:  # Blender 4 removed bone layers
+                arm_data = bpy.context.object.data
+                for bc in arm_data.collections_all:
+                    try:
+                        bc.unassign(context_bone)
+                    except Exception:
+                        pass
+                coll_name = f"Layer {param[3]}"
+                if coll_name not in arm_data.collections:
+                    arm_data.collections.new(coll_name)
+                arm_data.collections[coll_name].assign(context_bone)
 
         # ===========================================================
 
@@ -217,19 +229,40 @@ def bounding_box_set_up(self, name, color):
             ],
         }
 
-        # create new bone group
-        bone_group = arm.pose.bone_groups
+        # create new bone group or collection depending on Blender version
         bone_group_name = "Custom Bone Group"
-        bone_group.new(name=bone_group_name)
-        # set color to bone group
-        bone_group.active.color_set = "CUSTOM"
-        bone_group.active.colors.normal = (color[0], color[1], color[2])
+        bone_groups_attr = getattr(arm.pose, "bone_groups", None)
+        if bone_groups_attr is not None:
+            bone_group_ref = bone_groups_attr.new(name=bone_group_name)
+            bone_groups_attr.active = bone_group_ref
+            bone_group_ref.color_set = "CUSTOM"
+            bone_group_ref.colors.normal = (
+                color[0],
+                color[1],
+                color[2],
+            )
+        else:  # Blender 4 removed bone groups in favor of bone collections
+            arm_data = arm.data
+            if bone_group_name not in arm_data.collections:
+                bone_group_ref = arm_data.collections.new(bone_group_name)
+            else:
+                bone_group_ref = arm_data.collections[bone_group_name]
 
         for bone, constr in constraints.items():
             p_bone = arm.pose.bones[bone]
 
-            # assign bone to bone group
-            p_bone.bone_group = bone_group.get(bone_group_name)
+            # assign bone to group or collection
+            if hasattr(p_bone, "bone_group"):
+                p_bone.bone_group = bone_group_ref
+            else:  # Blender 4 bone collections
+                bone_group_ref.assign(p_bone)
+                if hasattr(p_bone.bone, "color"):
+                    p_bone.bone.color.palette = "CUSTOM"
+                    p_bone.bone.color.custom.normal = (
+                        color[0],
+                        color[1],
+                        color[2],
+                    )
 
             for c in constr:
                 p_bone.constraints.new(c[0])
