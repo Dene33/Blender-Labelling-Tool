@@ -229,19 +229,36 @@ def bounding_box_set_up(self, name, color):
             ],
         }
 
-        # create new bone group
-        bone_group = arm.pose.bone_groups
+        # create new bone group or collection depending on Blender version
         bone_group_name = "Custom Bone Group"
-        bone_group.new(name=bone_group_name)
-        # set color to bone group
-        bone_group.active.color_set = "CUSTOM"
-        bone_group.active.colors.normal = (color[0], color[1], color[2])
+        if hasattr(arm.pose, "bone_groups"):
+            bone_group = arm.pose.bone_groups
+            bone_group.new(name=bone_group_name)
+            bone_group.active.color_set = "CUSTOM"
+            bone_group.active.colors.normal = (color[0], color[1], color[2])
+            bone_group_ref = bone_group.get(bone_group_name)
+        else:  # Blender 4 removed bone groups in favor of bone collections
+            arm_data = arm.data
+            if bone_group_name not in arm_data.collections:
+                bone_group_ref = arm_data.collections.new(bone_group_name)
+            else:
+                bone_group_ref = arm_data.collections[bone_group_name]
 
         for bone, constr in constraints.items():
             p_bone = arm.pose.bones[bone]
 
-            # assign bone to bone group
-            p_bone.bone_group = bone_group.get(bone_group_name)
+            # assign bone to group or collection
+            if hasattr(p_bone, "bone_group"):
+                p_bone.bone_group = bone_group_ref
+            else:  # Blender 4 bone collections
+                bone_group_ref.assign(p_bone)
+                if hasattr(p_bone.bone, "color"):
+                    p_bone.bone.color.palette = "CUSTOM"
+                    p_bone.bone.color.custom.normal = (
+                        color[0],
+                        color[1],
+                        color[2],
+                    )
 
             for c in constr:
                 p_bone.constraints.new(c[0])
